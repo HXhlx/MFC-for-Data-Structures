@@ -19,10 +19,10 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 对话框数据
+	// 对话框数据
 	enum { IDD = IDD_ABOUTBOX };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 // 实现
@@ -50,19 +50,36 @@ END_MESSAGE_MAP()
 
 CHXDlg::CHXDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CHXDlg::IDD, pParent)
+	, input(_T(""))
+	, sway(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	deep = 0;
 }
 
 void CHXDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_WAY, way);
+	DDX_Control(pDX, IDC_RESULT, result);
+	DDX_Control(pDX, IDC_CODE, code);
+	DDX_Text(pDX, IDC_DEEP, deep);
+	DDX_Text(pDX, IDC_INPUT, input);
+	DDX_CBString(pDX, IDC_WAY, sway);
+	DDX_Control(pDX, IDC_PICTURE, picture);
 }
 
 BEGIN_MESSAGE_MAP(CHXDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_SHOW, &CHXDlg::OnBnClickedShow)
+	ON_BN_CLICKED(IDC_DISPLAY, &CHXDlg::OnBnClickedDisplay)
+	ON_BN_CLICKED(IDC_START, &CHXDlg::OnBnClickedStart)
+	ON_BN_CLICKED(IDC_STOP, &CHXDlg::OnBnClickedStop)
+	ON_BN_CLICKED(IDC_STEP, &CHXDlg::OnBnClickedStep)
+	ON_BN_CLICKED(IDC_CLEAN, &CHXDlg::OnBnClickedClean)
+	ON_CBN_SELCHANGE(IDC_WAY, &CHXDlg::OnSelchangeWay)
 END_MESSAGE_MAP()
 
 
@@ -98,7 +115,15 @@ BOOL CHXDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
+	CRect rect;
+	CString str[] = { "先","中","后" };
+	for (size_t i = 0; i < 3; i++)way.InsertString(i, str[i] + "序遍历二叉树");
+	sway = "先序遍历二叉树";
+	result.GetClientRect(rect);
+	result.InsertColumn(0, "遍历结果", LVCFMT_CENTER, rect.Width());
+	code.GetClientRect(rect);
+	code.InsertColumn(0, "代码", LVCFMT_CENTER, rect.Width());
+	UpdateData(FALSE);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -151,3 +176,45 @@ HCURSOR CHXDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CHXDlg::OnBnClickedShow()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CHXDlg::OnBnClickedDisplay()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CHXDlg::OnBnClickedStart()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CHXDlg::OnBnClickedStop()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CHXDlg::OnBnClickedStep()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CHXDlg::OnBnClickedClean()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CHXDlg::OnSelchangeWay()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}

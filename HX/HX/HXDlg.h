@@ -29,4 +29,19 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedShow();
+	afx_msg void OnBnClickedDisplay();
+	afx_msg void OnBnClickedStart();
+	afx_msg void OnBnClickedStop();
+	afx_msg void OnBnClickedStep();
+	afx_msg void OnBnClickedClean();
+	afx_msg void OnSelchangeWay();
+	CComboBox way;
+	CListCtrl result;
+	CListCtrl code;
+	unsigned deep;
+	CString input;
+	CString sway;
+	CStatic picture;
 };
