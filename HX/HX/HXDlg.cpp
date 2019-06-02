@@ -121,8 +121,10 @@ BOOL CHXDlg::OnInitDialog()
 	sway = "先序遍历二叉树";
 	result.GetClientRect(rect);
 	result.InsertColumn(0, "遍历结果", LVCFMT_CENTER, rect.Width());
+	result.SetExtendedStyle(LVS_EX_GRIDLINES);
 	code.GetClientRect(rect);
 	code.InsertColumn(0, "代码", LVCFMT_CENTER, rect.Width());
+	code.SetExtendedStyle(LVS_EX_GRIDLINES);
 	UpdateData(FALSE);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -165,6 +167,10 @@ void CHXDlg::OnPaint()
 	}
 	else
 	{
+		CDC* pDC = picture.GetDC();
+		CRect rect;
+		picture.GetClientRect(rect);
+		pDC->FillRect(rect, &CBrush(RGB(0, 255, 255)));
 		CDialogEx::OnPaint();
 	}
 }
