@@ -3,19 +3,20 @@
 //
 
 #pragma once
+#include "Tree.h"
 
 
 // CHXDlg 对话框
 class CHXDlg : public CDialogEx
 {
-// 构造
+	// 构造
 public:
 	CHXDlg(CWnd* pParent = NULL);	// 标准构造函数
 
 // 对话框数据
 	enum { IDD = IDD_HX_DIALOG };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
 
@@ -44,4 +45,5 @@ public:
 	CString input;
 	CString sway;
 	CStatic picture;
+	Tree* tree;
 };

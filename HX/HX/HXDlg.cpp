@@ -1,16 +1,16 @@
 
 // HXDlg.cpp : 实现文件
 //
-
 #include "stdafx.h"
 #include "HX.h"
 #include "HXDlg.h"
 #include "afxdialogex.h"
-
+#include <fstream>
+#include <string>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
+using namespace std;
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -121,11 +121,12 @@ BOOL CHXDlg::OnInitDialog()
 	sway = "先序遍历二叉树";
 	result.GetClientRect(rect);
 	result.InsertColumn(0, "遍历结果", LVCFMT_CENTER, rect.Width());
-	result.SetExtendedStyle(LVS_EX_GRIDLINES);
+	result.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	code.GetClientRect(rect);
 	code.InsertColumn(0, "代码", LVCFMT_CENTER, rect.Width());
-	code.SetExtendedStyle(LVS_EX_GRIDLINES);
+	code.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	UpdateData(FALSE);
+	OnSelchangeWay();
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -187,6 +188,7 @@ HCURSOR CHXDlg::OnQueryDragIcon()
 void CHXDlg::OnBnClickedShow()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	Tree::CreateBt(tree);
 }
 
 
@@ -223,4 +225,22 @@ void CHXDlg::OnBnClickedClean()
 void CHXDlg::OnSelchangeWay()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	code.DeleteAllItems();
+	string str, strf;
+	CString space[] = { "","","    ","    ","        ","        ","        ","    ","" };
+	ifstream file("Tree.cpp");
+	if (sway == "先序遍历二叉树")str = "Preorder";
+	else if (sway == "中序遍历二叉树")str = "Inorder";
+	else str = "Postorder";
+	while (getline(file, strf))if (strf.find(str) != strf.npos)
+	{
+		for (int i = 0; i < 9; i++)
+		{
+			code.InsertItem(i, space[i] + strf.c_str());
+			getline(file, strf);
+		}
+		break;
+	}
+	file.close();
 }
