@@ -7,6 +7,7 @@
 #include "afxdialogex.h"
 #include <fstream>
 #include <string>
+#include <vector>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -188,7 +189,19 @@ HCURSOR CHXDlg::OnQueryDragIcon()
 void CHXDlg::OnBnClickedShow()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	Tree::CreateBt(tree);
+	UpdateData();
+	ofstream os("tree.txt");
+	os.clear();
+	os << input;
+	os.close();
+	CreateBt(tree);
+	deep = 1;
+	BiTreeDepth(tree, 1, deep);
+	Restore();
+	is.open("tree.txt");
+	CPreorder(tree);
+	is.close();
+	UpdateData(FALSE);
 }
 
 
@@ -243,4 +256,30 @@ void CHXDlg::OnSelchangeWay()
 		break;
 	}
 	file.close();
+}
+void CHXDlg::CPreorder(BiTree T, int level)
+{
+	static int* order = new int[deep]();
+	if (T)
+	{
+		order[level - 1]++;
+		char ch;
+		CDC* pDC = picture.GetDC();
+		CRect rect;
+		CString str;
+		picture.GetClientRect(rect);
+		int x = rect.right * (2 * order[level - 1] - 1) / pow(2., level), y = rect.bottom * level / (deep + 1);
+		pDC->Ellipse(x - 10 * deep / level, y - 10 * deep / level, x + 10 * deep / level, y + 10 * deep / level);
+		do is >> ch;
+		while (ch == '#');
+		str.Format("%c", ch);
+		pDC->TextOut(x - 2*deep / level, y - 2*deep / level-7, str);
+		if (level > 1)
+		{
+			pDC->MoveTo(x, y);
+			pDC->LineTo((2 * ((order[level - 1] + 1) / 2) - 1) * rect.right / pow(2., level - 1), rect.bottom * (level - 1) / (deep + 1));
+		}
+		CPreorder(T->lchild, level + 1);
+		CPreorder(T->rchild, level + 1);
+	}
 }

@@ -1,18 +1,14 @@
 #pragma once
 #ifndef TREE
 #define TREE
-#define BiTNode Tree
-#define BiTree Tree*
+#include <fstream>
 typedef char DataType;
-class Tree
+typedef struct BiTNode
 {
 	DataType data;			//结点数据
-	BiTNode* lchild; //左孩子指针
-	BiTNode* rchild; //右孩子指针
-public:
-	void Preorder(BiTree T);
-	void Inorder(BiTree T);
-	void Postorder(BiTree T);
-	static void CreateBt(BiTree& T);
-};
+	struct BiTNode* lchild; //左孩子指针
+	struct BiTNode* rchild; //右孩子指针
+} BiTNode, * BiTree;
+void Preorder(BiTree T, int level), Inorder(BiTree T), Postorder(BiTree T), CreateBt(BiTree& T), Close(), BiTreeDepth(BiTree T, int level, int& depth), Restore();
+extern std::ifstream is;
 #endif // !TREE

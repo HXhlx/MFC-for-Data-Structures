@@ -5,7 +5,6 @@
 #pragma once
 #include "Tree.h"
 
-
 // CHXDlg ¶Ô»°¿ò
 class CHXDlg : public CDialogEx
 {
@@ -38,12 +37,14 @@ public:
 	afx_msg void OnBnClickedStep();
 	afx_msg void OnBnClickedClean();
 	afx_msg void OnSelchangeWay();
+	void CPreorder(BiTree T,int level=1);
 	CComboBox way;
 	CListCtrl result;
 	CListCtrl code;
-	unsigned deep;
+	int deep;
 	CString input;
 	CString sway;
 	CStatic picture;
-	Tree* tree;
+	BiTree tree;
+	std::ifstream is;
 };
