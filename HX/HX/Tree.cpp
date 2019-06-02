@@ -2,7 +2,7 @@
 #include "Tree.h"
 #include <stdio.h>
 #include <stdlib.h>
-std::ifstream is("tree.txt");
+std::ifstream is;
 void Preorder(BiTree T)
 {
 	if (T)
@@ -45,6 +45,7 @@ void CreateBt(BiTree& T)
 	{
 		T = (BiTree)malloc(sizeof(BiTNode));
 		T->data = ch;
+		//memset(T, 0, sizeof(BiTNode));
 		CreateBt(T->lchild);
 		CreateBt(T->rchild);
 	}
@@ -65,24 +66,7 @@ void Close()
 	is.close();
 }
 
-void Restore()
+void Open()
 {
-	is.seekg(0);
+	is.open("tree.txt");
 }
-
-/*void main()
-{
-	BiTree T;
-	printf("请输入二叉树完整序列（空子树结点用#补全）：例ABC##DE#G##F### \n");
-	CreateBt(T);
-	printf("先序遍历：");
-	Preorder(T);
-	printf("\n");
-	printf("中序遍历：");
-	Inorder(T);
-	printf("\n");
-	printf("后序遍历：");
-	Postorder(T);
-	printf("\n");
-	system("pause");
-}*/

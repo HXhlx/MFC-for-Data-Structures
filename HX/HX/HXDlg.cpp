@@ -56,6 +56,7 @@ CHXDlg::CHXDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	deep = 0;
+	font.CreatePointFont(150, "Consolas");
 }
 
 void CHXDlg::DoDataExchange(CDataExchange* pDX)
@@ -190,14 +191,20 @@ void CHXDlg::OnBnClickedShow()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
+	if (input=="")
+	{
+		MessageBox("请输入二叉树!");
+		return;
+	}
 	ofstream os("tree.txt");
 	os.clear();
 	os << input;
 	os.close();
+	Open();
 	CreateBt(tree);
 	deep = 1;
 	BiTreeDepth(tree, 1, deep);
-	Restore();
+	Close();
 	is.open("tree.txt");
 	CPreorder(tree);
 	is.close();
@@ -208,12 +215,27 @@ void CHXDlg::OnBnClickedShow()
 void CHXDlg::OnBnClickedDisplay()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	Open();
+	CreateBt(tree);
+	deep = 1;
+	BiTreeDepth(tree, 1, deep);
+	Close();
+	is.open("tree.txt");
+	string str;
+	is >> str;
+	UpdateData(FALSE);
+	MessageBox(str.c_str());
+	is.close();
+	is.open("tree.txt");
+	CPreorder(tree);
+	is.close();
 }
 
 
 void CHXDlg::OnBnClickedStart()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	
 }
 
 
@@ -232,6 +254,9 @@ void CHXDlg::OnBnClickedStep()
 void CHXDlg::OnBnClickedClean()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	is.open("tree.txt");
+	CPreorder(tree);
+	is.close();
 }
 
 
@@ -269,16 +294,21 @@ void CHXDlg::CPreorder(BiTree T, int level)
 		CString str;
 		picture.GetClientRect(rect);
 		int x = rect.right * (2 * order[level - 1] - 1) / pow(2., level), y = rect.bottom * level / (deep + 1);
-		pDC->Ellipse(x - 10 * deep / level, y - 10 * deep / level, x + 10 * deep / level, y + 10 * deep / level);
 		do is >> ch;
 		while (ch == '#');
 		str.Format("%c", ch);
-		pDC->TextOut(x - 2*deep / level, y - 2*deep / level-7, str);
+		CPen pen;
+		pen.CreatePen(PS_SOLID, 3, RGB(255, 255, 0));
+		pDC->SelectObject(&pen);
 		if (level > 1)
 		{
 			pDC->MoveTo(x, y);
 			pDC->LineTo((2 * ((order[level - 1] + 1) / 2) - 1) * rect.right / pow(2., level - 1), rect.bottom * (level - 1) / (deep + 1));
 		}
+		pDC->Ellipse(x - 10 * deep / level, y - 10 * deep / level, x + 10 * deep / level, y + 10 * deep / level);
+		pDC->SelectObject(&font);
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->TextOut(x - 2 * deep / level, y - 2 * deep / level - 7, str);
 		CPreorder(T->lchild, level + 1);
 		CPreorder(T->rchild, level + 1);
 	}

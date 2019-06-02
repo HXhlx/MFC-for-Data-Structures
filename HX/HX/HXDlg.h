@@ -47,4 +47,5 @@ public:
 	CStatic picture;
 	BiTree tree;
 	std::ifstream is;
+	CFont font;
 };
