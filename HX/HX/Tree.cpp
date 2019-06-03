@@ -45,7 +45,7 @@ void CreateBt(BiTree& T)
 	{
 		T = (BiTree)malloc(sizeof(BiTNode));
 		T->data = ch;
-		//memset(T, 0, sizeof(BiTNode));
+		T->adress = 1;
 		CreateBt(T->lchild);
 		CreateBt(T->rchild);
 	}

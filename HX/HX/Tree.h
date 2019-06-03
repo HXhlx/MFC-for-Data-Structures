@@ -5,7 +5,7 @@
 typedef char DataType;
 typedef struct BiTNode
 {
-	//BiTNode();
+	int adress;
 	DataType data;			//结点数据
 	struct BiTNode* lchild; //左孩子指针
 	struct BiTNode* rchild; //右孩子指针

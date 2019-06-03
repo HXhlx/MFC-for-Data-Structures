@@ -12,7 +12,6 @@
 #define new DEBUG_NEW
 #endif
 using namespace std;
-
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -54,9 +53,11 @@ CHXDlg::CHXDlg(CWnd* pParent /*=NULL*/)
 	, input(_T(""))
 	, sway(_T(""))
 {
+	tree = NULL;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	deep = 0;
 	font.CreatePointFont(150, "Consolas");
+	color = RGB(0, 0, 0);
 }
 
 void CHXDlg::DoDataExchange(CDataExchange* pDX)
@@ -173,7 +174,7 @@ void CHXDlg::OnPaint()
 		CDC* pDC = picture.GetDC();
 		CRect rect;
 		picture.GetClientRect(rect);
-		pDC->FillRect(rect, &CBrush(RGB(0, 255, 255)));
+		pDC->FillRect(rect, &CBrush(RGB(170, 170, 170)));
 		CDialogEx::OnPaint();
 	}
 }
@@ -191,51 +192,67 @@ void CHXDlg::OnBnClickedShow()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
-	if (input=="")
+	if (input == "")
 	{
-		MessageBox("请输入二叉树!");
+		MessageBox("请输入二叉树!", "警告", MB_ICONWARNING);
 		return;
 	}
 	ofstream os("tree.txt");
 	os.clear();
 	os << input;
 	os.close();
-	Open();
-	CreateBt(tree);
-	deep = 1;
-	BiTreeDepth(tree, 1, deep);
-	Close();
-	is.open("tree.txt");
-	CPreorder(tree);
-	is.close();
-	UpdateData(FALSE);
+	OnBnClickedDisplay();
 }
 
 
 void CHXDlg::OnBnClickedDisplay()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	CDC* pDC = picture.GetDC();
+	CRect rect;
+	picture.GetClientRect(rect);
+	pDC->FillRect(&rect, &CBrush(RGB(170, 170, 170)));
 	Open();
 	CreateBt(tree);
 	deep = 1;
 	BiTreeDepth(tree, 1, deep);
 	Close();
-	is.open("tree.txt");
+	UpdateData(FALSE);
+	ifstream is("tree.txt");
 	string str;
 	is >> str;
-	UpdateData(FALSE);
 	MessageBox(str.c_str());
+	line(tree);
 	is.close();
-	is.open("tree.txt");
-	CPreorder(tree);
-	is.close();
+	color = RGB(0, 0, 0);
+	CreateTree(tree);
 }
 
 
 void CHXDlg::OnBnClickedStart()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	
+	UpdateData();
+	if (tree == NULL)
+	{
+		MessageBox("请输入二叉树!", "错误", MB_ICONERROR);
+		return;
+	}
+	if (sway == "先序遍历二叉树")
+	{
+		color = RGB(255, 255, 0);
+		CPreorder(tree);
+	}
+	else if (sway == "中序遍历二叉树")
+	{
+		color = RGB(255, 0, 255);
+		CInorder(tree);
+	}
+	else
+	{
+		color = RGB(0, 255, 255);
+		CPostorder(tree);
+	}
 }
 
 
@@ -254,9 +271,8 @@ void CHXDlg::OnBnClickedStep()
 void CHXDlg::OnBnClickedClean()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	is.open("tree.txt");
+	color = RGB(0, 0, 0);
 	CPreorder(tree);
-	is.close();
 }
 
 
@@ -282,34 +298,83 @@ void CHXDlg::OnSelchangeWay()
 	}
 	file.close();
 }
-void CHXDlg::CPreorder(BiTree T, int level)
+void CHXDlg::line(BiTree T, int level)
 {
-	static int* order = new int[deep]();
 	if (T)
 	{
-		order[level - 1]++;
-		char ch;
 		CDC* pDC = picture.GetDC();
 		CRect rect;
-		CString str;
 		picture.GetClientRect(rect);
-		int x = rect.right * (2 * order[level - 1] - 1) / pow(2., level), y = rect.bottom * level / (deep + 1);
-		do is >> ch;
-		while (ch == '#');
-		str.Format("%c", ch);
+		if (T->lchild)T->lchild->adress = 2 * T->adress - 1;
+		if (T->rchild)T->rchild->adress = 2 * T->adress;
+		int x = rect.right * T->adress / (pow(2., level - 1) + 1), y = rect.bottom * level / (deep + 1);
 		CPen pen;
-		pen.CreatePen(PS_SOLID, 3, RGB(255, 255, 0));
+		pen.CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
 		pDC->SelectObject(&pen);
-		if (level > 1)
+		if (level < deep)
 		{
 			pDC->MoveTo(x, y);
-			pDC->LineTo((2 * ((order[level - 1] + 1) / 2) - 1) * rect.right / pow(2., level - 1), rect.bottom * (level - 1) / (deep + 1));
+			if (T->lchild)pDC->LineTo(T->lchild->adress * rect.right / (pow(2., level) + 1), rect.bottom * (level + 1) / (deep + 1));
+			pDC->MoveTo(x, y);
+			if (T->rchild)pDC->LineTo(T->rchild->adress * rect.right / (pow(2., level) + 1), rect.bottom * (level + 1) / (deep + 1));
 		}
-		pDC->Ellipse(x - 10 * deep / level, y - 10 * deep / level, x + 10 * deep / level, y + 10 * deep / level);
-		pDC->SelectObject(&font);
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->TextOut(x - 2 * deep / level, y - 2 * deep / level - 7, str);
+		line(T->lchild, level + 1);
+		line(T->rchild, level + 1);
+	}
+}
+void CHXDlg::CPreorder(BiTree T, int level)
+{
+	if (T)
+	{
+		DrawTree(T, level);
 		CPreorder(T->lchild, level + 1);
 		CPreorder(T->rchild, level + 1);
 	}
+}
+
+void CHXDlg::CInorder(BiTree T, int level)
+{
+	if (T)
+	{
+		CInorder(T->lchild, level + 1);
+		DrawTree(T, level);
+		CInorder(T->rchild, level + 1);
+	}
+}
+
+void CHXDlg::CPostorder(BiTree T, int level)
+{
+	if (T)
+	{
+		CPostorder(T->lchild, level + 1);
+		CPostorder(T->rchild, level + 1);
+		DrawTree(T, level);
+	}
+}
+
+void CHXDlg::CreateTree(BiTree T, int level)
+{
+	if (T)
+	{
+		DrawTree(T, level);
+		CreateTree(T->lchild, level + 1);
+		CreateTree(T->rchild, level + 1);
+	}
+}
+
+void CHXDlg::DrawTree(BiTree T, int level)
+{
+	CDC* pDC = picture.GetDC();
+	CRect rect;
+	CString str;
+	picture.GetClientRect(rect);
+	int x = rect.right * T->adress / (pow(2., level - 1) + 1), y = rect.bottom * level / (deep + 1);
+	str.Format("%c", T->data);
+	CPen pen;
+	pen.CreatePen(PS_SOLID, 3, color);
+	pDC->SelectObject(&pen);
+	pDC->Ellipse(x - 10 * deep / level, y - 10 * deep / level, x + 10 * deep / level, y + 10 * deep / level);
+	pDC->SelectObject(&font);
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->TextOut(x - 2 * deep / level, y - 2 * deep / level - 7, str);
 }

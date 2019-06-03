@@ -37,7 +37,12 @@ public:
 	afx_msg void OnBnClickedStep();
 	afx_msg void OnBnClickedClean();
 	afx_msg void OnSelchangeWay();
-	void CPreorder(BiTree T,int level=1);
+	void line(BiTree T, int level = 1);
+	void CPreorder(BiTree T, int level = 1);
+	void CInorder(BiTree T, int level = 1);
+	void CPostorder(BiTree T, int level = 1);
+	void CreateTree(BiTree T, int level = 1);
+	void DrawTree(BiTree T, int level = 1);
 	CComboBox way;
 	CListCtrl result;
 	CListCtrl code;
@@ -46,6 +51,6 @@ public:
 	CString sway;
 	CStatic picture;
 	BiTree tree;
-	std::ifstream is;
 	CFont font;
+	COLORREF color;
 };
