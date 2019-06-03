@@ -35,7 +35,7 @@ void Postorder(BiTree T)
 
 //
 
-void CreateBt(BiTree& T)
+void CreateBt(BiTree& T, int level)
 {
 	char ch;
 	is >> ch;
@@ -46,14 +46,15 @@ void CreateBt(BiTree& T)
 		T = (BiTree)malloc(sizeof(BiTNode));
 		T->data = ch;
 		T->adress = 1;
-		CreateBt(T->lchild);
-		CreateBt(T->rchild);
+		T->level = level;
+		CreateBt(T->lchild, level + 1);
+		CreateBt(T->rchild, level + 1);
 	}
 }
 
 void BiTreeDepth(BiTree T, int level, int& depth)
 {
-	if(T)
+	if (T)
 	{
 		if (level > depth)depth = level;
 		BiTreeDepth(T->lchild, level + 1, depth);

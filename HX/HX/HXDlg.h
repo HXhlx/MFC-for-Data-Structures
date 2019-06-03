@@ -4,6 +4,8 @@
 
 #pragma once
 #include "Tree.h"
+#include <vector>
+#include <iostream>
 
 // CHXDlg ¶Ô»°¿ò
 class CHXDlg : public CDialogEx
@@ -34,15 +36,14 @@ public:
 	afx_msg void OnBnClickedDisplay();
 	afx_msg void OnBnClickedStart();
 	afx_msg void OnBnClickedStop();
-	afx_msg void OnBnClickedStep();
 	afx_msg void OnBnClickedClean();
 	afx_msg void OnSelchangeWay();
 	void line(BiTree T, int level = 1);
-	void CPreorder(BiTree T, int level = 1);
-	void CInorder(BiTree T, int level = 1);
-	void CPostorder(BiTree T, int level = 1);
 	void CreateTree(BiTree T, int level = 1);
 	void DrawTree(BiTree T, int level = 1);
+	void NRPreorder();
+	void NRInorder();
+	void CPostorder(BiTree T);
 	CComboBox way;
 	CListCtrl result;
 	CListCtrl code;
@@ -53,4 +54,6 @@ public:
 	BiTree tree;
 	CFont font;
 	COLORREF color;
+	std::vector<BiTree>Tree;
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

@@ -80,9 +80,9 @@ BEGIN_MESSAGE_MAP(CHXDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_DISPLAY, &CHXDlg::OnBnClickedDisplay)
 	ON_BN_CLICKED(IDC_START, &CHXDlg::OnBnClickedStart)
 	ON_BN_CLICKED(IDC_STOP, &CHXDlg::OnBnClickedStop)
-	ON_BN_CLICKED(IDC_STEP, &CHXDlg::OnBnClickedStep)
 	ON_BN_CLICKED(IDC_CLEAN, &CHXDlg::OnBnClickedClean)
 	ON_CBN_SELCHANGE(IDC_WAY, &CHXDlg::OnSelchangeWay)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -238,33 +238,21 @@ void CHXDlg::OnBnClickedStart()
 		MessageBox("请输入二叉树!", "错误", MB_ICONERROR);
 		return;
 	}
-	if (sway == "先序遍历二叉树")
-	{
-		color = RGB(255, 255, 0);
-		CPreorder(tree);
-	}
-	else if (sway == "中序遍历二叉树")
-	{
-		color = RGB(255, 0, 255);
-		CInorder(tree);
-	}
-	else
+	if(sway=="后序遍历二叉树")
 	{
 		color = RGB(0, 255, 255);
 		CPostorder(tree);
+		return;
 	}
+	if(Tree.empty())result.DeleteAllItems();
+	SetTimer(0, 1000, NULL);
 }
 
 
 void CHXDlg::OnBnClickedStop()
 {
 	// TODO: 在此添加控件通知处理程序代码
-}
-
-
-void CHXDlg::OnBnClickedStep()
-{
-	// TODO: 在此添加控件通知处理程序代码
+	KillTimer(0);
 }
 
 
@@ -272,7 +260,7 @@ void CHXDlg::OnBnClickedClean()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	color = RGB(0, 0, 0);
-	CPreorder(tree);
+	CreateTree(tree);
 }
 
 
@@ -322,35 +310,6 @@ void CHXDlg::line(BiTree T, int level)
 		line(T->rchild, level + 1);
 	}
 }
-void CHXDlg::CPreorder(BiTree T, int level)
-{
-	if (T)
-	{
-		DrawTree(T, level);
-		CPreorder(T->lchild, level + 1);
-		CPreorder(T->rchild, level + 1);
-	}
-}
-
-void CHXDlg::CInorder(BiTree T, int level)
-{
-	if (T)
-	{
-		CInorder(T->lchild, level + 1);
-		DrawTree(T, level);
-		CInorder(T->rchild, level + 1);
-	}
-}
-
-void CHXDlg::CPostorder(BiTree T, int level)
-{
-	if (T)
-	{
-		CPostorder(T->lchild, level + 1);
-		CPostorder(T->rchild, level + 1);
-		DrawTree(T, level);
-	}
-}
 
 void CHXDlg::CreateTree(BiTree T, int level)
 {
@@ -377,4 +336,92 @@ void CHXDlg::DrawTree(BiTree T, int level)
 	pDC->SelectObject(&font);
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->TextOut(x - 2 * deep / level, y - 2 * deep / level - 7, str);
+}
+
+void CHXDlg::NRPreorder()
+{
+	static BiTree T = tree;
+	if (T)
+	{
+		Tree.push_back(T);
+		DrawTree(T, T->level);
+		CString str;
+		str.Format("%c", T->data);
+		result.InsertItem(result.GetItemCount(), str);
+		T = T->lchild;
+	}
+	else if (!Tree.empty())
+	{
+		result.InsertItem(result.GetItemCount(), "NULL");
+		T = Tree.back();
+		Tree.pop_back();
+		T = T->rchild;
+	}
+	else
+	{
+		result.InsertItem(result.GetItemCount(), "NULL");
+		Tree.clear();
+		KillTimer(0);
+	}
+}
+
+void CHXDlg::NRInorder()
+{
+	static BiTree T = tree;
+	static bool flag = true;
+	if (T)
+	{
+		Tree.push_back(T);
+		T = T->lchild;
+	}
+	else if (!Tree.empty())
+	{
+		result.InsertItem(result.GetItemCount(), "NULL");
+		T = Tree.back();
+		DrawTree(T, T->level);
+		CString str;
+		str.Format("%c", T->data);
+		result.InsertItem(result.GetItemCount(), str);
+		Tree.pop_back();
+		T = T->rchild;
+	}
+	else
+	{
+		result.InsertItem(result.GetItemCount(), "NULL");
+		Tree.clear();
+		KillTimer(0);
+	}
+}
+
+void CHXDlg::CPostorder(BiTree T)
+{
+	if (T)
+	{
+		CString str;
+		str.Format("%c", T->data);
+		result.InsertItem(result.GetItemCount(), str);
+	}
+	else result.InsertItem(result.GetItemCount(), "NULL");
+	if (T)
+	{
+		CPostorder(T->lchild);
+		CPostorder(T->rchild);
+		Sleep(1000);
+		DrawTree(T, T->level);
+	}
+}
+void CHXDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (sway == "先序遍历二叉树")
+	{
+		color = RGB(255, 255, 0);
+		NRPreorder();
+	}
+	else if (sway == "中序遍历二叉树")
+	{
+		color = RGB(255, 0, 255);
+		NRInorder();
+	}
+	CDialogEx::OnTimer(nIDEvent);
 }
