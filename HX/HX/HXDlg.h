@@ -55,5 +55,6 @@ public:
 	CFont font;
 	COLORREF color;
 	std::vector<BiTree>Tree;
+	BiTree CTree;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

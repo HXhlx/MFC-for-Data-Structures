@@ -244,7 +244,11 @@ void CHXDlg::OnBnClickedStart()
 		CPostorder(tree);
 		return;
 	}
-	if(Tree.empty())result.DeleteAllItems();
+	if (Tree.empty()) 
+	{
+		result.DeleteAllItems();
+		CTree = tree;
+	}
 	SetTimer(0, 1000, NULL);
 }
 
@@ -259,7 +263,11 @@ void CHXDlg::OnBnClickedStop()
 void CHXDlg::OnBnClickedClean()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	KillTimer(0);
 	color = RGB(0, 0, 0);
+	Tree.clear();
+	CTree = tree;
+	result.DeleteAllItems();
 	CreateTree(tree);
 }
 
@@ -340,22 +348,21 @@ void CHXDlg::DrawTree(BiTree T, int level)
 
 void CHXDlg::NRPreorder()
 {
-	static BiTree T = tree;
-	if (T)
+	if (CTree)
 	{
-		Tree.push_back(T);
-		DrawTree(T, T->level);
+		Tree.push_back(CTree);
+		DrawTree(CTree, CTree->level);
 		CString str;
-		str.Format("%c", T->data);
+		str.Format("%c", CTree->data);
 		result.InsertItem(result.GetItemCount(), str);
-		T = T->lchild;
+		CTree = CTree->lchild;
 	}
 	else if (!Tree.empty())
 	{
 		result.InsertItem(result.GetItemCount(), "NULL");
-		T = Tree.back();
+		CTree = Tree.back();
 		Tree.pop_back();
-		T = T->rchild;
+		CTree = CTree->rchild;
 	}
 	else
 	{
@@ -367,23 +374,21 @@ void CHXDlg::NRPreorder()
 
 void CHXDlg::NRInorder()
 {
-	static BiTree T = tree;
-	static bool flag = true;
-	if (T)
+	if (CTree)
 	{
-		Tree.push_back(T);
-		T = T->lchild;
+		Tree.push_back(CTree);
+		CTree = CTree->lchild;
 	}
 	else if (!Tree.empty())
 	{
 		result.InsertItem(result.GetItemCount(), "NULL");
-		T = Tree.back();
-		DrawTree(T, T->level);
+		CTree = Tree.back();
+		DrawTree(CTree, CTree->level);
 		CString str;
-		str.Format("%c", T->data);
+		str.Format("%c", CTree->data);
 		result.InsertItem(result.GetItemCount(), str);
 		Tree.pop_back();
-		T = T->rchild;
+		CTree = CTree->rchild;
 	}
 	else
 	{
