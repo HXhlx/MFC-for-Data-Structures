@@ -55,9 +55,9 @@ CHXDlg::CHXDlg(CWnd* pParent /*=NULL*/)
 {
 	tree = NULL;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	deep = 0;
 	font.CreatePointFont(150, "Consolas");
 	color = RGB(0, 0, 0);
+	colume = row = deep = 0;
 }
 
 void CHXDlg::DoDataExchange(CDataExchange* pDX)
@@ -197,6 +197,21 @@ void CHXDlg::OnBnClickedShow()
 		MessageBox("请输入二叉树!", "警告", MB_ICONWARNING);
 		return;
 	}
+	int n = 1;
+	for (size_t i = 0; i < input.GetLength(); i++)
+	{
+		if (--n < 0)
+		{
+			MessageBox("输入不合法!", "错误", MB_ICONERROR);
+			return;
+		}
+		if (input[i] != '#')n += 2;
+	}
+	if (n)
+	{
+		MessageBox("输入不合法!", "错误", MB_ICONERROR);
+		return;
+	}
 	ofstream os("tree.txt");
 	os.clear();
 	os << input;
@@ -238,18 +253,28 @@ void CHXDlg::OnBnClickedStart()
 		MessageBox("请输入二叉树!", "错误", MB_ICONERROR);
 		return;
 	}
-	if(sway=="后序遍历二叉树")
+	if (Tree.empty())
+	{
+		result.DeleteAllItems();
+		CTree = tree;
+		colume = row = 0;
+	}
+	if (sway == "先序遍历二叉树")
+	{
+		color = RGB(255, 255, 0);
+		SetTimer(0, 1000, NULL);
+	}
+	else if (sway == "中序遍历二叉树")
+	{
+		color = RGB(255, 255, 0);
+		SetTimer(1, 1000, NULL);
+	}
+	else
 	{
 		color = RGB(0, 255, 255);
 		CPostorder(tree);
 		return;
 	}
-	if (Tree.empty()) 
-	{
-		result.DeleteAllItems();
-		CTree = tree;
-	}
-	SetTimer(0, 1000, NULL);
 }
 
 
@@ -257,6 +282,7 @@ void CHXDlg::OnBnClickedStop()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	KillTimer(0);
+	KillTimer(1);
 }
 
 
@@ -264,6 +290,7 @@ void CHXDlg::OnBnClickedClean()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	KillTimer(0);
+	KillTimer(1);
 	color = RGB(0, 0, 0);
 	Tree.clear();
 	CTree = tree;
@@ -359,14 +386,12 @@ void CHXDlg::NRPreorder()
 	}
 	else if (!Tree.empty())
 	{
-		result.InsertItem(result.GetItemCount(), "NULL");
 		CTree = Tree.back();
 		Tree.pop_back();
 		CTree = CTree->rchild;
 	}
 	else
 	{
-		result.InsertItem(result.GetItemCount(), "NULL");
 		Tree.clear();
 		KillTimer(0);
 	}
@@ -381,7 +406,6 @@ void CHXDlg::NRInorder()
 	}
 	else if (!Tree.empty())
 	{
-		result.InsertItem(result.GetItemCount(), "NULL");
 		CTree = Tree.back();
 		DrawTree(CTree, CTree->level);
 		CString str;
@@ -392,9 +416,8 @@ void CHXDlg::NRInorder()
 	}
 	else
 	{
-		result.InsertItem(result.GetItemCount(), "NULL");
 		Tree.clear();
-		KillTimer(0);
+		KillTimer(1);
 	}
 }
 
@@ -402,31 +425,103 @@ void CHXDlg::CPostorder(BiTree T)
 {
 	if (T)
 	{
-		CString str;
-		str.Format("%c", T->data);
-		result.InsertItem(result.GetItemCount(), str);
-	}
-	else result.InsertItem(result.GetItemCount(), "NULL");
-	if (T)
-	{
 		CPostorder(T->lchild);
 		CPostorder(T->rchild);
 		Sleep(1000);
 		DrawTree(T, T->level);
 	}
+	if (T)
+	{
+		CString str;
+		str.Format("%c", T->data);
+		result.InsertItem(result.GetItemCount(), str);
+	}
+	else result.InsertItem(result.GetItemCount(), "NULL");
 }
 void CHXDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	if (sway == "先序遍历二叉树")
+	static int Flag = 0;
+	switch (nIDEvent)
 	{
-		color = RGB(255, 255, 0);
-		NRPreorder();
-	}
-	else if (sway == "中序遍历二叉树")
-	{
-		color = RGB(255, 0, 255);
-		NRInorder();
+	case 0:
+		if (CTree)
+		{
+			row = 0;
+			code.SetItemState(6, 0, LVIS_SELECTED);
+			int n[] = { 2,4,5 };
+			code.SetItemState(n[colume - 1], 0, LVIS_SELECTED);
+			code.SetFocus();
+			if (colume == 3)colume = 0;
+			code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
+			if (colume == 2)NRPreorder();
+			Flag = 1;
+		}
+		else if(Flag)
+		{
+			code.SetItemState(4, 0, LVIS_SELECTED);
+			code.SetFocus();
+			code.SetItemState(5, LVIS_SELECTED, LVIS_SELECTED);
+			Flag = 0;
+		}
+		else
+		{
+			colume = 0;
+			code.SetItemState(5, 0, LVIS_SELECTED);
+			int n[] = { 2,10,6 };
+			if (row != 1)
+			{
+				code.SetItemState(n[row - 1], 0, LVIS_SELECTED);
+				code.SetFocus();
+				if (row == 3)row = 0;
+				code.SetItemState(n[row++], LVIS_SELECTED, LVIS_SELECTED);
+			}
+			else
+			{
+				row++;
+				code.SetItemState(2, 0, LVIS_SELECTED);
+				NRPreorder();
+				result.InsertItem(result.GetItemCount(), "NULL");
+			}
+		}
+		break;
+	case 1:
+		if (CTree)
+		{
+			row = 0;
+			code.SetItemState(6, 0, LVIS_SELECTED);
+			int n[] = { 2,4 };
+			code.SetItemState(n[colume - 1], 0, LVIS_SELECTED);
+			code.SetFocus();
+			if (colume == 2)
+			{
+				colume = 0;
+				NRInorder();
+			}
+			code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
+			
+		}
+		else
+		{
+			colume = 0;
+			code.SetItemState(2, 0, LVIS_SELECTED);
+			int n[] = { 2,10,5,6 };
+			if (row != 1)
+			{
+				code.SetItemState(n[row - 1], 0, LVIS_SELECTED);
+				code.SetFocus();
+				if (row == 4)row = 0;
+				result.InsertItem(result.GetItemCount(), "NULL");
+				code.SetItemState(n[row++], LVIS_SELECTED, LVIS_SELECTED);
+			}
+			else
+			{
+				row++;
+				code.SetItemState(6, 0, LVIS_SELECTED);
+				NRInorder();
+			}
+		}
+		break;
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }

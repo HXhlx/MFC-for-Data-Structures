@@ -56,5 +56,6 @@ public:
 	COLORREF color;
 	std::vector<BiTree>Tree;
 	BiTree CTree;
+	int colume, row;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
