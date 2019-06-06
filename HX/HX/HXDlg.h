@@ -58,4 +58,5 @@ public:
 	BiTree CTree;
 	int colume, row;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };

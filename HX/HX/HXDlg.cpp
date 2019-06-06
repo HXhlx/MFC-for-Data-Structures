@@ -83,6 +83,7 @@ BEGIN_MESSAGE_MAP(CHXDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CLEAN, &CHXDlg::OnBnClickedClean)
 	ON_CBN_SELCHANGE(IDC_WAY, &CHXDlg::OnSelchangeWay)
 	ON_WM_TIMER()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -524,4 +525,15 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
 		break;
 	}
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+BOOL CHXDlg::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	CRect rect;
+	GetClientRect(rect);
+	pDC->FillRect(&rect, &CBrush(RGB(0, 255, 255)));
+	return TRUE;
+	return CDialogEx::OnEraseBkgnd(pDC);
 }
