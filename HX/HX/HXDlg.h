@@ -5,8 +5,11 @@
 #pragma once
 #include "Tree.h"
 #include <vector>
-#include <iostream>
-
+struct ctree
+{
+	BiTree T;
+	int tag;
+};
 // CHXDlg ¶Ô»°¿ò
 class CHXDlg : public CDialogEx
 {
@@ -43,7 +46,7 @@ public:
 	void DrawTree(BiTree T, int level = 1);
 	void NRPreorder();
 	void NRInorder();
-	void CPostorder(BiTree T);
+	void NRPostorder();
 	CComboBox way;
 	CListCtrl result;
 	CListCtrl code;
@@ -57,6 +60,7 @@ public:
 	std::vector<BiTree>Tree;
 	BiTree CTree;
 	int colume, row;
+	std::vector<struct ctree>CT;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };

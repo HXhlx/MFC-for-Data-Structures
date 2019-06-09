@@ -273,8 +273,7 @@ void CHXDlg::OnBnClickedStart()
 	else
 	{
 		color = RGB(0, 255, 255);
-		CPostorder(tree);
-		return;
+		SetTimer(2, 1000, NULL);
 	}
 }
 
@@ -284,6 +283,7 @@ void CHXDlg::OnBnClickedStop()
 	// TODO: 在此添加控件通知处理程序代码
 	KillTimer(0);
 	KillTimer(1);
+	KillTimer(2);
 }
 
 
@@ -292,10 +292,12 @@ void CHXDlg::OnBnClickedClean()
 	// TODO: 在此添加控件通知处理程序代码
 	KillTimer(0);
 	KillTimer(1);
+	KillTimer(2);
 	color = RGB(0, 0, 0);
 	Tree.clear();
 	CTree = tree;
 	result.DeleteAllItems();
+	code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
 	CreateTree(tree);
 }
 
@@ -376,153 +378,188 @@ void CHXDlg::DrawTree(BiTree T, int level)
 
 void CHXDlg::NRPreorder()
 {
+	static int Flag = 0;
 	if (CTree)
 	{
-		Tree.push_back(CTree);
-		DrawTree(CTree, CTree->level);
-		CString str;
-		str.Format("%c", CTree->data);
-		result.InsertItem(result.GetItemCount(), str);
-		CTree = CTree->lchild;
+		row = 0;
+		int n[] = { 2,4,5 };
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		code.SetFocus();
+		if (colume == 3)colume = 0;
+		code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
+		if (colume == 2)
+		{
+			Tree.push_back(CTree);
+			DrawTree(CTree, CTree->level);
+			CString str;
+			str.Format("%c", CTree->data);
+			result.InsertItem(result.GetItemCount(), str);
+			CTree = CTree->lchild;
+		}
+		Flag = 1;
 	}
-	else if (!Tree.empty())
+	else if (Flag)
 	{
-		CTree = Tree.back();
-		Tree.pop_back();
-		CTree = CTree->rchild;
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		code.SetFocus();
+		code.SetItemState(5, LVIS_SELECTED, LVIS_SELECTED);
+		Flag = 0;
 	}
 	else
 	{
-		Tree.clear();
-		KillTimer(0);
+		colume = 0;
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		int n[] = { 2,10,6 };
+		if (row != 1)
+		{
+			code.SetFocus();
+			if (row == 3)row = 0;
+			code.SetItemState(n[row++], LVIS_SELECTED, LVIS_SELECTED);
+		}
+		else
+		{
+			if (!Tree.empty())
+			{
+				row++;
+				CTree = Tree.back();
+				Tree.pop_back();
+				CTree = CTree->rchild;
+			}
+			else
+			{
+				Tree.clear();
+				KillTimer(0);
+			}
+			result.InsertItem(result.GetItemCount(), "NULL");
+		}
 	}
 }
 
 void CHXDlg::NRInorder()
 {
-	if (CTree)
+	static int Flag = 0;
+	if (Flag)
 	{
-		Tree.push_back(CTree);
-		CTree = CTree->lchild;
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		code.SetFocus();
+		code.SetItemState(6, LVIS_SELECTED, LVIS_SELECTED);
+		Flag = 0;
 	}
-	else if (!Tree.empty())
+	else if (CTree)
 	{
-		CTree = Tree.back();
+		row = 0;
+		int n[] = { 2,4 };
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		code.SetFocus();
+		if (colume == 2)
+		{
+			colume = 0;
+			Tree.push_back(CTree);
+			CTree = CTree->lchild;
+		}
+		code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
+	}
+	else
+	{
+		colume = 0;
+		if (row != 1)
+		{
+			code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+			code.SetFocus();
+			if (++row == 4)row = 0;
+			result.InsertItem(result.GetItemCount(), "NULL");
+			code.SetItemState(2, LVIS_SELECTED, LVIS_SELECTED);
+		}
+		else if (!Tree.empty())
+		{
+			code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+			code.SetFocus();
+			code.SetItemState(5, LVIS_SELECTED, LVIS_SELECTED);
+			CTree = Tree.back();
+			DrawTree(CTree, CTree->level);
+			CString str;
+			str.Format("%c", CTree->data);
+			result.InsertItem(result.GetItemCount(), str);
+			Tree.pop_back();
+			CTree = CTree->rchild;
+			Flag = 1;
+		}
+		else
+		{
+			code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+			Tree.clear();
+			KillTimer(1);
+		}
+	}
+}
+
+void CHXDlg::NRPostorder()
+{
+	static int f = 1;
+	if (f == 1 && CTree)
+	{
+		row = 0;
+		struct ctree c = { CTree,0 };
+		int n[2] = { 2,4 };
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		code.SetFocus();
+		code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
+		if (colume == 2)
+		{
+			colume = 0;
+			CT.push_back(c);
+			CTree = CTree->lchild;
+		}
+		if (!CTree)
+			if (f == 2 && !CT.empty() && CT.back().tag == 1)f = 2;
+			else f = 3;
+	}
+	else if (f == 2 && !CT.empty() && CT.back().tag == 1)
+	{
+		code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+		code.SetFocus();
+		if (colume == 2)colume = 0;
+		code.SetItemState(6, LVIS_SELECTED, LVIS_SELECTED);
+		CTree = CT.back().T;
+		CT.pop_back();
 		DrawTree(CTree, CTree->level);
 		CString str;
 		str.Format("%c", CTree->data);
 		result.InsertItem(result.GetItemCount(), str);
-		Tree.pop_back();
-		CTree = CTree->rchild;
+		if (CT.empty() || CT.back().tag != 1)f = 3;
 	}
-	else
+	else if (f == 3)
 	{
-		Tree.clear();
-		KillTimer(1);
+		if (!CT.empty())
+		{
+			int n[2] = { 2,5 };
+			code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+			code.SetFocus();
+			if (colume == 2)colume = 0;
+			code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
+			CTree = CT.back().T;
+			CT.pop_back();
+			CT.back().tag = 1;
+			CTree = CTree->rchild;
+		}
+		else
+		{
+			code.SetItemState(code.GetSelectionMark(), 0, LVIS_SELECTED);
+			CTree = NULL;
+			CT.clear();
+		}
+		if (CTree)f = 1;
+		else if (f == 2 && !CT.empty() && CT.back().tag == 1)f = 2;
 	}
-}
-
-void CHXDlg::CPostorder(BiTree T)
-{
-	if (T)
-	{
-		CPostorder(T->lchild);
-		CPostorder(T->rchild);
-		Sleep(1000);
-		DrawTree(T, T->level);
-	}
-	if (T)
-	{
-		CString str;
-		str.Format("%c", T->data);
-		result.InsertItem(result.GetItemCount(), str);
-	}
-	else result.InsertItem(result.GetItemCount(), "NULL");
 }
 void CHXDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	static int Flag = 0;
 	switch (nIDEvent)
 	{
-	case 0:
-		if (CTree)
-		{
-			row = 0;
-			code.SetItemState(6, 0, LVIS_SELECTED);
-			int n[] = { 2,4,5 };
-			code.SetItemState(n[colume - 1], 0, LVIS_SELECTED);
-			code.SetFocus();
-			if (colume == 3)colume = 0;
-			code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
-			if (colume == 2)NRPreorder();
-			Flag = 1;
-		}
-		else if(Flag)
-		{
-			code.SetItemState(4, 0, LVIS_SELECTED);
-			code.SetFocus();
-			code.SetItemState(5, LVIS_SELECTED, LVIS_SELECTED);
-			Flag = 0;
-		}
-		else
-		{
-			colume = 0;
-			code.SetItemState(5, 0, LVIS_SELECTED);
-			int n[] = { 2,10,6 };
-			if (row != 1)
-			{
-				code.SetItemState(n[row - 1], 0, LVIS_SELECTED);
-				code.SetFocus();
-				if (row == 3)row = 0;
-				code.SetItemState(n[row++], LVIS_SELECTED, LVIS_SELECTED);
-			}
-			else
-			{
-				row++;
-				code.SetItemState(2, 0, LVIS_SELECTED);
-				NRPreorder();
-				result.InsertItem(result.GetItemCount(), "NULL");
-			}
-		}
-		break;
-	case 1:
-		if (CTree)
-		{
-			row = 0;
-			code.SetItemState(6, 0, LVIS_SELECTED);
-			int n[] = { 2,4 };
-			code.SetItemState(n[colume - 1], 0, LVIS_SELECTED);
-			code.SetFocus();
-			if (colume == 2)
-			{
-				colume = 0;
-				NRInorder();
-			}
-			code.SetItemState(n[colume++], LVIS_SELECTED, LVIS_SELECTED);
-			
-		}
-		else
-		{
-			colume = 0;
-			code.SetItemState(2, 0, LVIS_SELECTED);
-			int n[] = { 2,10,5,6 };
-			if (row != 1)
-			{
-				code.SetItemState(n[row - 1], 0, LVIS_SELECTED);
-				code.SetFocus();
-				if (row == 4)row = 0;
-				result.InsertItem(result.GetItemCount(), "NULL");
-				code.SetItemState(n[row++], LVIS_SELECTED, LVIS_SELECTED);
-			}
-			else
-			{
-				row++;
-				code.SetItemState(6, 0, LVIS_SELECTED);
-				NRInorder();
-			}
-		}
-		break;
+	case 0:NRPreorder(); break;
+	case 1:NRInorder(); break;
+	case 2:NRPostorder(); break;
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }
@@ -535,5 +572,4 @@ BOOL CHXDlg::OnEraseBkgnd(CDC* pDC)
 	GetClientRect(rect);
 	pDC->FillRect(&rect, &CBrush(RGB(0, 255, 255)));
 	return TRUE;
-	return CDialogEx::OnEraseBkgnd(pDC);
 }
