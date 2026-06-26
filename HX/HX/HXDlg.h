@@ -1,66 +1,72 @@
 
-// HXDlg.h : 头文件
+// HXDlg.h : header file
 //
 
 #pragma once
 #include "Tree.h"
 #include <vector>
-struct ctree
+
+struct TraversalState
 {
-	BiTree T;
-	int tag;
+    std::vector<std::wstring> steps;
+    int currentIndex;
+    bool isRunning;
+
+    TraversalState() : currentIndex(0), isRunning(false) {}
 };
-// CHXDlg 对话框
+
+// CHXDlg dialog
 class CHXDlg : public CDialogEx
 {
-	// 构造
+// Construction
 public:
-	CHXDlg(CWnd* pParent = NULL);	// 标准构造函数
+    CHXDlg(CWnd* pParent = NULL);
 
-// 对话框数据
-	enum { IDD = IDD_HX_DIALOG };
+// Dialog Data
+    enum { IDD = IDD_HX_DIALOG };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
+    virtual void DoDataExchange(CDataExchange* pDX);
 
-
-// 实现
+// Implementation
 protected:
-	HICON m_hIcon;
+    HICON m_hIcon;
 
-	// 生成的消息映射函数
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
+    virtual BOOL OnInitDialog();
+    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+    afx_msg void OnPaint();
+    afx_msg HCURSOR OnQueryDragIcon();
+    DECLARE_MESSAGE_MAP()
+
 public:
-	afx_msg void OnBnClickedShow();
-	afx_msg void OnBnClickedDisplay();
-	afx_msg void OnBnClickedStart();
-	afx_msg void OnBnClickedStop();
-	afx_msg void OnBnClickedClean();
-	afx_msg void OnSelchangeWay();
-	void line(BiTree T, int level = 1);
-	void CreateTree(BiTree T, int level = 1);
-	void DrawTree(BiTree T, int level = 1);
-	void NRPreorder();
-	void NRInorder();
-	void NRPostorder();
-	CComboBox way;
-	CListCtrl result;
-	CListCtrl code;
-	int deep;
-	CString input;
-	CString sway;
-	CStatic picture;
-	BiTree tree;
-	CFont font;
-	COLORREF color;
-	std::vector<BiTree>Tree;
-	BiTree CTree;
-	int colume, row;
-	std::vector<struct ctree>CT;
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg void OnBnClickedShow();
+    afx_msg void OnBnClickedDisplay();
+    afx_msg void OnBnClickedStart();
+    afx_msg void OnBnClickedStop();
+    afx_msg void OnBnClickedClean();
+    afx_msg void OnSelchangeWay();
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg void OnDestroy();
+    afx_msg void OnTimer(UINT_PTR nIDEvent);
+
+    void DrawTree(const BiTNode* node, int level, COLORREF color);
+    void DrawTreeRecursive(const BiTNode* node, int level, COLORREF color);
+    void DrawLines(const BiTNode* node, int level);
+    void RedrawTree();
+    void DrawNodeHighlight(const BiTNode* node, int level, COLORREF color);
+
+    CComboBox m_wndWay;
+    CListCtrl m_wndResult;
+    CListCtrl m_wndCode;
+    CStatic m_wndPicture;
+
+    int m_nDeep;
+    CString m_strInput;
+    BiTreePtr m_tree;
+    CFont m_font;
+
+    int m_nCurrentType;
+    TraversalState m_state;
+    std::vector<const BiTNode*> m_nodeSteps;
+    static const UINT_PTR TIMER_ID = 1001;
 };

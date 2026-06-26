@@ -1,32 +1,24 @@
 
-// HX.h : PROJECT_NAME 应用程序的主头文件
+// HX.h : main header file for the PROJECT_NAME application
 //
 
 #pragma once
 
 #ifndef __AFXWIN_H__
-	#error "在包含此文件之前包含“stdafx.h”以生成 PCH 文件"
+    #error "include 'stdafx.h' before including this file for PCH"
 #endif
 
-#include "resource.h"		// 主符号
-
-
-// CHXApp:
-// 有关此类的实现，请参阅 HX.cpp
-//
+#include "resource.h"
 
 class CHXApp : public CWinApp
 {
 public:
-	CHXApp();
+    CHXApp();
 
-// 重写
 public:
-	virtual BOOL InitInstance();
+    virtual BOOL InitInstance();
 
-// 实现
-
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 };
 
 extern CHXApp theApp;
