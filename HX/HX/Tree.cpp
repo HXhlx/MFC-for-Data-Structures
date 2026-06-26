@@ -1,4 +1,5 @@
 #include "Tree.h"
+#include <algorithm>
 
 BiTreePtr CreateBt(const std::wstring& input, size_t& index, int level, int address)
 {
@@ -252,36 +253,42 @@ void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::
 
 void MorrisPostorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
 {
-    if (!root) return;
-
-    // Use iterative postorder with stack (simpler and reliable)
-    std::vector<const BiTNode*> stack;
+    // Morris Postorder: mirrored preorder (NRL), then reverse → LRN
     const BiTNode* current = root;
-    const BiTNode* lastVisited = nullptr;
 
-    while (!stack.empty() || current)
+    while (current)
     {
-        if (current)
+        if (!current->rchild)
         {
-            stack.push_back(current);
-            current = current->lchild.get();
+            steps.push_back(std::wstring(1, current->data));
+            nodes.push_back(current);
+            current = current->lchild ? current->lchild.get() : current->thread;
         }
         else
         {
-            const BiTNode* peekNode = stack.back();
-            if (peekNode->rchild && peekNode->rchild.get() != lastVisited)
+            // Find leftmost in right subtree
+            const BiTNode* predecessor = current->rchild.get();
+            while (predecessor->lchild)
+                predecessor = predecessor->lchild.get();
+
+            if (predecessor->thread != current)
             {
-                current = peekNode->rchild.get();
+                steps.push_back(std::wstring(1, current->data));
+                nodes.push_back(current);
+                const_cast<BiTNode*>(predecessor)->thread = const_cast<BiTNode*>(current);
+                current = current->rchild.get();
             }
             else
             {
-                steps.push_back(std::wstring(1, peekNode->data));
-                nodes.push_back(peekNode);
-                lastVisited = peekNode;
-                stack.pop_back();
+                const_cast<BiTNode*>(predecessor)->thread = nullptr;
+                // Follow lchild or thread back
+                current = current->lchild ? current->lchild.get() : current->thread;
             }
         }
     }
+
+    std::reverse(steps.begin(), steps.end());
+    std::reverse(nodes.begin(), nodes.end());
 }
 
 std::vector<std::wstring> MorrisTraversal(const BiTNode* root, int type)
