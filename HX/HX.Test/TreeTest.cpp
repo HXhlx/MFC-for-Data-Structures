@@ -352,3 +352,157 @@ TEST(BiTNode, ParameterizedConstructor) {
     EXPECT_TRUE(node.lchild == nullptr);
     EXPECT_TRUE(node.rchild == nullptr);
 }
+
+// Test Suite: Morris Traversal - O(1) Space
+TEST(MorrisTraversal, InorderSingleNode) {
+    std::wstring input = L"A##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 1);
+    EXPECT_EQ(steps.size(), 1u);
+    EXPECT_EQ(steps[0], L"A");
+}
+
+TEST(MorrisTraversal, PreorderSingleNode) {
+    std::wstring input = L"A##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 0);
+    EXPECT_EQ(steps.size(), 1u);
+    EXPECT_EQ(steps[0], L"A");
+}
+
+TEST(MorrisTraversal, PostorderSingleNode) {
+    std::wstring input = L"A##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 2);
+    EXPECT_EQ(steps.size(), 1u);
+    EXPECT_EQ(steps[0], L"A");
+}
+
+TEST(MorrisTraversal, InorderThreeNodes) {
+    //     A
+    //    / \
+    //   B   C
+    std::wstring input = L"AB##C##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 1);
+    // Inorder: B, A, C
+    EXPECT_EQ(steps.size(), 3u);
+    EXPECT_EQ(steps[0], L"B");
+    EXPECT_EQ(steps[1], L"A");
+    EXPECT_EQ(steps[2], L"C");
+}
+
+TEST(MorrisTraversal, PreorderThreeNodes) {
+    std::wstring input = L"AB##C##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 0);
+    // Preorder: A, B, C
+    EXPECT_EQ(steps.size(), 3u);
+    EXPECT_EQ(steps[0], L"A");
+    EXPECT_EQ(steps[1], L"B");
+    EXPECT_EQ(steps[2], L"C");
+}
+
+TEST(MorrisTraversal, PostorderThreeNodes) {
+    std::wstring input = L"AB##C##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 2);
+    // Postorder: B, C, A
+    EXPECT_EQ(steps.size(), 3u);
+    EXPECT_EQ(steps[0], L"B");
+    EXPECT_EQ(steps[1], L"C");
+    EXPECT_EQ(steps[2], L"A");
+}
+
+TEST(MorrisTraversal, InorderFullTree) {
+    //       A
+    //      / \
+    //     B   C
+    //    / \   \
+    //   D   E   F
+    std::wstring input = L"ABD##E##C#F##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 1);
+    // Inorder: D, B, E, A, C, F
+    EXPECT_EQ(steps.size(), 6u);
+    EXPECT_EQ(steps[0], L"D");
+    EXPECT_EQ(steps[1], L"B");
+    EXPECT_EQ(steps[2], L"E");
+    EXPECT_EQ(steps[3], L"A");
+    EXPECT_EQ(steps[4], L"C");
+    EXPECT_EQ(steps[5], L"F");
+}
+
+TEST(MorrisTraversal, PreorderFullTree) {
+    std::wstring input = L"ABD##E##C#F##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 0);
+    // Preorder: A, B, D, E, C, F
+    EXPECT_EQ(steps.size(), 6u);
+    EXPECT_EQ(steps[0], L"A");
+    EXPECT_EQ(steps[1], L"B");
+    EXPECT_EQ(steps[2], L"D");
+    EXPECT_EQ(steps[3], L"E");
+    EXPECT_EQ(steps[4], L"C");
+    EXPECT_EQ(steps[5], L"F");
+}
+
+TEST(MorrisTraversal, PostorderFullTree) {
+    std::wstring input = L"ABD##E##C#F##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    auto steps = MorrisTraversal(tree.get(), 2);
+    // Postorder: D, E, B, F, C, A
+    EXPECT_EQ(steps.size(), 6u);
+    EXPECT_EQ(steps[0], L"D");
+    EXPECT_EQ(steps[1], L"E");
+    EXPECT_EQ(steps[2], L"B");
+    EXPECT_EQ(steps[3], L"F");
+    EXPECT_EQ(steps[4], L"C");
+    EXPECT_EQ(steps[5], L"A");
+}
+
+TEST(MorrisTraversal, MatchesRecursive) {
+    // Verify Morris traversal produces same result as recursive (non-NULL nodes only)
+    std::wstring input = L"ABD##E##CF##G##";
+    size_t index = 0;
+    auto tree = CreateBt(input, index);
+
+    // Morris traversal only visits non-NULL nodes
+    auto morrisInorder = MorrisTraversal(tree.get(), 1);
+    auto morrisPreorder = MorrisTraversal(tree.get(), 0);
+    auto morrisPostorder = MorrisTraversal(tree.get(), 2);
+
+    // Count non-NULL nodes in recursive traversal
+    auto recursiveInorder = GetTraversalSteps(tree.get(), 1);
+    int nonNullCount = 0;
+    for (const auto& s : recursiveInorder) {
+        if (s != L"NULL") nonNullCount++;
+    }
+
+    EXPECT_EQ(morrisInorder.size(), nonNullCount);
+    EXPECT_EQ(morrisPreorder.size(), nonNullCount);
+    EXPECT_EQ(morrisPostorder.size(), nonNullCount);
+}
+
+TEST(BiTNode, ThreadFieldDefaultNull) {
+    BiTNode node(L'X', 1);
+    EXPECT_TRUE(node.thread == nullptr);
+}

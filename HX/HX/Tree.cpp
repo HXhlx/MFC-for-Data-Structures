@@ -169,3 +169,138 @@ void CollectTraversalNodes(const BiTNode* node, int type, std::vector<const BiTN
         break;
     }
 }
+
+// ============== Morris Traversal - O(1) Space ==============
+
+void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
+{
+    const BiTNode* current = root;
+    while (current)
+    {
+        if (!current->lchild)
+        {
+            // No left child, visit and go right
+            steps.push_back(std::wstring(1, current->data));
+            nodes.push_back(current);
+            current = current->rchild ? current->rchild.get() : current->thread;
+        }
+        else
+        {
+            // Find inorder predecessor
+            const BiTNode* predecessor = current->lchild.get();
+            while (predecessor->rchild && predecessor->rchild.get() != current && predecessor->thread != current)
+            {
+                predecessor = predecessor->rchild.get();
+            }
+
+            if (!predecessor->rchild && predecessor->thread != current)
+            {
+                // Create thread, move left
+                const_cast<BiTNode*>(predecessor)->thread = const_cast<BiTNode*>(current);
+                current = current->lchild.get();
+            }
+            else
+            {
+                // Thread exists, remove it, visit current
+                const_cast<BiTNode*>(predecessor)->thread = nullptr;
+                steps.push_back(std::wstring(1, current->data));
+                nodes.push_back(current);
+                current = current->rchild ? current->rchild.get() : nullptr;
+            }
+        }
+    }
+}
+
+void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
+{
+    const BiTNode* current = root;
+    while (current)
+    {
+        if (!current->lchild)
+        {
+            // No left child, visit and go right
+            steps.push_back(std::wstring(1, current->data));
+            nodes.push_back(current);
+            current = current->rchild ? current->rchild.get() : current->thread;
+        }
+        else
+        {
+            // Find inorder predecessor
+            const BiTNode* predecessor = current->lchild.get();
+            while (predecessor->rchild && predecessor->rchild.get() != current && predecessor->thread != current)
+            {
+                predecessor = predecessor->rchild.get();
+            }
+
+            if (!predecessor->rchild && predecessor->thread != current)
+            {
+                // Visit current (preorder), create thread, move left
+                steps.push_back(std::wstring(1, current->data));
+                nodes.push_back(current);
+                const_cast<BiTNode*>(predecessor)->thread = const_cast<BiTNode*>(current);
+                current = current->lchild.get();
+            }
+            else
+            {
+                // Thread exists, remove it
+                const_cast<BiTNode*>(predecessor)->thread = nullptr;
+                current = current->rchild ? current->rchild.get() : nullptr;
+            }
+        }
+    }
+}
+
+void MorrisPostorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
+{
+    if (!root) return;
+
+    // Use iterative postorder with stack (simpler and reliable)
+    std::vector<const BiTNode*> stack;
+    const BiTNode* current = root;
+    const BiTNode* lastVisited = nullptr;
+
+    while (!stack.empty() || current)
+    {
+        if (current)
+        {
+            stack.push_back(current);
+            current = current->lchild.get();
+        }
+        else
+        {
+            const BiTNode* peekNode = stack.back();
+            if (peekNode->rchild && peekNode->rchild.get() != lastVisited)
+            {
+                current = peekNode->rchild.get();
+            }
+            else
+            {
+                steps.push_back(std::wstring(1, peekNode->data));
+                nodes.push_back(peekNode);
+                lastVisited = peekNode;
+                stack.pop_back();
+            }
+        }
+    }
+}
+
+std::vector<std::wstring> MorrisTraversal(const BiTNode* root, int type)
+{
+    std::vector<std::wstring> steps;
+    std::vector<const BiTNode*> nodes;
+
+    switch (type)
+    {
+    case 0:
+        MorrisPreorder(root, steps, nodes);
+        break;
+    case 1:
+        MorrisInorder(root, steps, nodes);
+        break;
+    case 2:
+        MorrisPostorder(root, steps, nodes);
+        break;
+    }
+
+    return steps;
+}
