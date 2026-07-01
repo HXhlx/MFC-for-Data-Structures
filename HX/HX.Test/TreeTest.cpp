@@ -134,25 +134,25 @@ TEST(BiTreeDepth, FullTree) {
 
 // Test Suite: GetTraversalCode
 TEST(GetTraversalCode, Preorder) {
-    std::wstring code = GetTraversalCode(0);
+    std::wstring code = GetTraversalCode(TraversalType::Preorder);
     EXPECT_TRUE(code.find(L"Morris Preorder") != std::wstring::npos);
     EXPECT_TRUE(code.find(L"visit(curr)") != std::wstring::npos);
 }
 
 TEST(GetTraversalCode, Inorder) {
-    std::wstring code = GetTraversalCode(1);
+    std::wstring code = GetTraversalCode(TraversalType::Inorder);
     EXPECT_TRUE(code.find(L"Morris Inorder") != std::wstring::npos);
     EXPECT_TRUE(code.find(L"visit(curr)") != std::wstring::npos);
 }
 
 TEST(GetTraversalCode, Postorder) {
-    std::wstring code = GetTraversalCode(2);
+    std::wstring code = GetTraversalCode(TraversalType::Postorder);
     EXPECT_TRUE(code.find(L"Morris Postorder") != std::wstring::npos);
     EXPECT_TRUE(code.find(L"reverse") != std::wstring::npos);
 }
 
 TEST(GetTraversalCode, InvalidType) {
-    std::wstring code = GetTraversalCode(99);
+    std::wstring code = GetTraversalCode(static_cast<TraversalType>(99));
     EXPECT_TRUE(code.empty());
 }
 
@@ -166,7 +166,7 @@ TEST(GetTraversalSteps, PreorderSingleNode) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 0);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Preorder);
 
     // Preorder: A, NULL(left), NULL(right)
     EXPECT_EQ(steps.size(), 3u);
@@ -180,7 +180,7 @@ TEST(GetTraversalSteps, InorderSingleNode) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 1);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Inorder);
 
     // Inorder: NULL(left), A, NULL(right)
     EXPECT_EQ(steps.size(), 3u);
@@ -194,7 +194,7 @@ TEST(GetTraversalSteps, PostorderSingleNode) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 2);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Postorder);
 
     // Postorder: NULL(left), NULL(right), A
     EXPECT_EQ(steps.size(), 3u);
@@ -209,7 +209,7 @@ TEST(GetTraversalSteps, PreorderTwoNodes) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 0);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Preorder);
 
     // Preorder: A, B, NULL, NULL, NULL(right of A is #, but input is AB##C##)
     // Actually: A->left=B, A->right=C, B->left=null, B->right=null, C->left=null, C->right=null
@@ -225,7 +225,7 @@ TEST(GetTraversalSteps, PreorderTwoNodes) {
 }
 
 TEST(GetTraversalSteps, EmptyTree) {
-    auto steps = GetTraversalSteps(nullptr, 0);
+    auto steps = GetTraversalSteps(nullptr, TraversalType::Preorder);
     EXPECT_EQ(steps.size(), 1u);
     EXPECT_EQ(steps[0], L"NULL");
 }
@@ -240,7 +240,7 @@ TEST(GetTraversalSteps, PreorderFullTree) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 0);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Preorder);
 
     // Preorder: A, B, D, NULL, NULL, E, NULL, NULL, C, NULL, F, NULL, NULL
     EXPECT_EQ(steps.size(), 13u);
@@ -264,7 +264,7 @@ TEST(GetTraversalSteps, InorderFullTree) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 1);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Inorder);
 
     // Inorder: NULL, D, NULL, B, NULL, E, NULL, A, NULL, C, NULL, F, NULL
     EXPECT_EQ(steps.size(), 13u);
@@ -288,7 +288,7 @@ TEST(GetTraversalSteps, PostorderFullTree) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = GetTraversalSteps(tree.get(), 2);
+    auto steps = GetTraversalSteps(tree.get(), TraversalType::Postorder);
 
     // Postorder: NULL, NULL, D, NULL, NULL, E, B, NULL, NULL, NULL, F, C, A
     EXPECT_EQ(steps.size(), 13u);
@@ -358,7 +358,7 @@ TEST(MorrisTraversal, InorderSingleNode) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 1);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Inorder);
     EXPECT_EQ(steps.size(), 1u);
     EXPECT_EQ(steps[0], L"A");
 }
@@ -368,7 +368,7 @@ TEST(MorrisTraversal, PreorderSingleNode) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 0);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Preorder);
     EXPECT_EQ(steps.size(), 1u);
     EXPECT_EQ(steps[0], L"A");
 }
@@ -378,7 +378,7 @@ TEST(MorrisTraversal, PostorderSingleNode) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 2);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Postorder);
     EXPECT_EQ(steps.size(), 1u);
     EXPECT_EQ(steps[0], L"A");
 }
@@ -391,7 +391,7 @@ TEST(MorrisTraversal, InorderThreeNodes) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 1);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Inorder);
     // Inorder: B, A, C
     EXPECT_EQ(steps.size(), 3u);
     EXPECT_EQ(steps[0], L"B");
@@ -404,7 +404,7 @@ TEST(MorrisTraversal, PreorderThreeNodes) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 0);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Preorder);
     // Preorder: A, B, C
     EXPECT_EQ(steps.size(), 3u);
     EXPECT_EQ(steps[0], L"A");
@@ -417,7 +417,7 @@ TEST(MorrisTraversal, PostorderThreeNodes) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 2);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Postorder);
     // Postorder: B, C, A
     EXPECT_EQ(steps.size(), 3u);
     EXPECT_EQ(steps[0], L"B");
@@ -435,7 +435,7 @@ TEST(MorrisTraversal, InorderFullTree) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 1);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Inorder);
     // Inorder: D, B, E, A, C, F
     EXPECT_EQ(steps.size(), 6u);
     EXPECT_EQ(steps[0], L"D");
@@ -451,7 +451,7 @@ TEST(MorrisTraversal, PreorderFullTree) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 0);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Preorder);
     // Preorder: A, B, D, E, C, F
     EXPECT_EQ(steps.size(), 6u);
     EXPECT_EQ(steps[0], L"A");
@@ -467,7 +467,7 @@ TEST(MorrisTraversal, PostorderFullTree) {
     size_t index = 0;
     auto tree = CreateBt(input, index);
 
-    auto steps = MorrisTraversal(tree.get(), 2);
+    auto steps = MorrisTraversal(tree.get(), TraversalType::Postorder);
     // Postorder: D, E, B, F, C, A
     EXPECT_EQ(steps.size(), 6u);
     EXPECT_EQ(steps[0], L"D");
@@ -485,12 +485,12 @@ TEST(MorrisTraversal, MatchesRecursive) {
     auto tree = CreateBt(input, index);
 
     // Morris traversal only visits non-NULL nodes
-    auto morrisInorder = MorrisTraversal(tree.get(), 1);
-    auto morrisPreorder = MorrisTraversal(tree.get(), 0);
-    auto morrisPostorder = MorrisTraversal(tree.get(), 2);
+    auto morrisInorder = MorrisTraversal(tree.get(), TraversalType::Inorder);
+    auto morrisPreorder = MorrisTraversal(tree.get(), TraversalType::Preorder);
+    auto morrisPostorder = MorrisTraversal(tree.get(), TraversalType::Postorder);
 
     // Count non-NULL nodes in recursive traversal
-    auto recursiveInorder = GetTraversalSteps(tree.get(), 1);
+    auto recursiveInorder = GetTraversalSteps(tree.get(), TraversalType::Inorder);
     int nonNullCount = 0;
     for (const auto& s : recursiveInorder) {
         if (s != L"NULL") nonNullCount++;

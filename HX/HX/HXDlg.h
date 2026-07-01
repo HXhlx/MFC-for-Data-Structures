@@ -65,7 +65,7 @@ public:
     BiTreePtr m_tree;
     CFont m_font;
 
-    int m_nCurrentType;
+    TraversalType m_nCurrentType;
     TraversalState m_state;
     std::vector<const BiTNode*> m_nodeSteps;
     static const UINT_PTR TIMER_ID = 1001;

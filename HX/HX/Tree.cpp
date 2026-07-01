@@ -26,11 +26,11 @@ int BiTreeDepth(const BiTNode* node)
     return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
 }
 
-std::wstring GetTraversalCode(int type)
+std::wstring GetTraversalCode(TraversalType type)
 {
     switch (type)
     {
-    case 0: // Morris Preorder
+    case TraversalType::Preorder:
         return L"Morris Preorder - O(1) space\n"
                L"while (curr) {\n"
                L"  if (!curr->left) {\n"
@@ -48,7 +48,7 @@ std::wstring GetTraversalCode(int type)
                L"    }\n"
                L"  }\n"
                L"}";
-    case 1: // Morris Inorder
+    case TraversalType::Inorder:
         return L"Morris Inorder - O(1) space\n"
                L"while (curr) {\n"
                L"  if (!curr->left) {\n"
@@ -66,7 +66,7 @@ std::wstring GetTraversalCode(int type)
                L"    }\n"
                L"  }\n"
                L"}";
-    case 2: // Morris Postorder
+    case TraversalType::Postorder:
         return L"Morris Postorder - O(1) space\n"
                L"// Mirrored preorder (NRL)\n"
                L"while (curr) {\n"
@@ -127,18 +127,18 @@ static void PostorderSteps(const BiTNode* node, std::vector<std::wstring>& steps
     steps.push_back(std::wstring(1, node->data));
 }
 
-std::vector<std::wstring> GetTraversalSteps(const BiTNode* node, int type)
+std::vector<std::wstring> GetTraversalSteps(const BiTNode* node, TraversalType type)
 {
     std::vector<std::wstring> steps;
     switch (type)
     {
-    case 0:
+    case TraversalType::Preorder:
         PreorderSteps(node, steps);
         break;
-    case 1:
+    case TraversalType::Inorder:
         InorderSteps(node, steps);
         break;
-    case 2:
+    case TraversalType::Postorder:
         PostorderSteps(node, steps);
         break;
     }
@@ -181,17 +181,17 @@ static void PostorderNodes(const BiTNode* node, std::vector<const BiTNode*>& nod
     nodes.push_back(node);
 }
 
-void CollectTraversalNodes(const BiTNode* node, int type, std::vector<const BiTNode*>& nodes)
+void CollectTraversalNodes(const BiTNode* node, TraversalType type, std::vector<const BiTNode*>& nodes)
 {
     switch (type)
     {
-    case 0:
+    case TraversalType::Preorder:
         PreorderNodes(node, nodes);
         break;
-    case 1:
+    case TraversalType::Inorder:
         InorderNodes(node, nodes);
         break;
-    case 2:
+    case TraversalType::Postorder:
         PostorderNodes(node, nodes);
         break;
     }
@@ -328,20 +328,20 @@ void MorrisPostorder(const BiTNode* root, std::vector<std::wstring>& steps, std:
     std::reverse(nodes.begin(), nodes.end());
 }
 
-std::vector<std::wstring> MorrisTraversal(const BiTNode* root, int type)
+std::vector<std::wstring> MorrisTraversal(const BiTNode* root, TraversalType type)
 {
     std::vector<std::wstring> steps;
     std::vector<const BiTNode*> nodes;
 
     switch (type)
     {
-    case 0:
+    case TraversalType::Preorder:
         MorrisPreorder(root, steps, nodes);
         break;
-    case 1:
+    case TraversalType::Inorder:
         MorrisInorder(root, steps, nodes);
         break;
-    case 2:
+    case TraversalType::Postorder:
         MorrisPostorder(root, steps, nodes);
         break;
     }
@@ -349,7 +349,7 @@ std::vector<std::wstring> MorrisTraversal(const BiTNode* root, int type)
     return steps;
 }
 
-void MorrisTraversalWithNodes(const BiTNode* root, int type,
+void MorrisTraversalWithNodes(const BiTNode* root, TraversalType type,
     std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
 {
     // Clear previous results
@@ -361,13 +361,13 @@ void MorrisTraversalWithNodes(const BiTNode* root, int type,
 
     switch (type)
     {
-    case 0:
+    case TraversalType::Preorder:
         MorrisPreorder(root, steps, nodes);
         break;
-    case 1:
+    case TraversalType::Inorder:
         MorrisInorder(root, steps, nodes);
         break;
-    case 2:
+    case TraversalType::Postorder:
         MorrisPostorder(root, steps, nodes);
         break;
     }

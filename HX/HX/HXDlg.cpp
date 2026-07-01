@@ -39,7 +39,7 @@ CHXDlg::CHXDlg(CWnd* pParent)
     : CDialogEx(CHXDlg::IDD, pParent)
     , m_strInput(_T(""))
     , m_nDeep(0)
-    , m_nCurrentType(0)
+    , m_nCurrentType(TraversalType::Preorder)
 {
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     m_font.CreatePointFont(150, _T("Consolas"));
@@ -224,9 +224,10 @@ void CHXDlg::OnBnClickedStart()
         return;
     }
 
-    m_nCurrentType = m_wndWay.GetCurSel();
-    LOG("OnBnClickedStart: m_nCurrentType=" + std::to_string(m_nCurrentType));
-    if (m_nCurrentType < 0 || m_nCurrentType > 2)
+    int sel = m_wndWay.GetCurSel();
+    m_nCurrentType = static_cast<TraversalType>(sel);
+    LOG("OnBnClickedStart: m_nCurrentType=" + std::to_string(sel));
+    if (sel < 0 || sel > 2)
     {
         AfxMessageBox(_T("\u8bf7\u9009\u62e9\u904d\u5386\u65b9\u5f0f\uff01"), MB_ICONWARNING);
         return;
@@ -244,7 +245,7 @@ void CHXDlg::OnBnClickedStart()
     m_state.isRunning = true;
 
     SetTimer(TIMER_ID, 500, NULL);
-    LOG("Morris traversal animation started, type=" + std::to_string(m_nCurrentType));
+    LOG("Morris traversal animation started, type=" + std::to_string(static_cast<int>(m_nCurrentType)));
 }
 
 void CHXDlg::OnBnClickedStop()
@@ -268,15 +269,16 @@ void CHXDlg::OnBnClickedClean()
 
 void CHXDlg::OnSelchangeWay()
 {
-    int sel = m_wndWay.GetCurSel();
-    if (sel == CB_ERR)
-        sel = 0;
+    int selIdx = m_wndWay.GetCurSel();
+    if (selIdx == CB_ERR)
+        selIdx = 0;
 
-    LOG("OnSelchangeWay called, sel=" + std::to_string(sel));
+    auto type = static_cast<TraversalType>(selIdx);
+    LOG("OnSelchangeWay called, sel=" + std::to_string(selIdx));
 
     m_wndCode.DeleteAllItems();
 
-    std::wstring code = GetTraversalCode(sel);
+    std::wstring code = GetTraversalCode(type);
     std::wistringstream iss(code);
     std::wstring line;
     int idx = 0;
