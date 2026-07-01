@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CHXDlg, CDialogEx)
     ON_WM_ERASEBKGND()
     ON_WM_DESTROY()
     ON_WM_TIMER()
+    ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 BOOL CHXDlg::OnInitDialog()
@@ -125,6 +126,21 @@ BOOL CHXDlg::OnInitDialog()
     m_wndCode.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
     OnSelchangeWay();
+
+    // Subclass buttons as CMFCButton for modern styling
+    m_btnShow.SubclassDlgItem(IDC_SHOW, this);
+    m_btnDisplay.SubclassDlgItem(IDC_DISPLAY, this);
+    m_btnStart.SubclassDlgItem(IDC_START, this);
+    m_btnStop.SubclassDlgItem(IDC_STOP, this);
+    m_btnClean.SubclassDlgItem(IDC_CLEAN, this);
+
+    // Create status bar at bottom
+    CRect rc;
+    GetClientRect(&rc);
+    m_wndStatusBar.Create(_T("Ready"), WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP | SS_SUNKEN,
+        CRect(0, rc.bottom - 22, rc.right, rc.bottom), this);
+    m_wndStatusBar.SetFont(GetFont());
+
     return TRUE;
 }
 
@@ -166,6 +182,12 @@ HCURSOR CHXDlg::OnQueryDragIcon()
     return static_cast<HCURSOR>(m_hIcon);
 }
 
+static int CountNodes(const BiTNode* node)
+{
+    if (!node) return 0;
+    return 1 + CountNodes(node->lchild.get()) + CountNodes(node->rchild.get());
+}
+
 void CHXDlg::OnBnClickedShow()
 {
     UpdateData();
@@ -200,6 +222,9 @@ void CHXDlg::OnBnClickedShow()
 
     RedrawTree();
     LOG("Tree created, depth=" + std::to_string(m_nDeep));
+    CString status;
+    status.Format(_T("Tree loaded  |  Nodes: %d  |  Depth: %d"), CountNodes(m_tree.get()), m_nDeep);
+    UpdateStatusBar(status.GetString());
 }
 
 void CHXDlg::OnBnClickedDisplay()
@@ -246,6 +271,12 @@ void CHXDlg::OnBnClickedStart()
 
     SetTimer(TIMER_ID, 500, NULL);
     LOG("Morris traversal animation started, type=" + std::to_string(static_cast<int>(m_nCurrentType)));
+
+    const wchar_t* typeNames[] = { L"Preorder", L"Inorder", L"Postorder" };
+    int ti = static_cast<int>(m_nCurrentType);
+    CString status;
+    status.Format(_T("Traversing (%s)  |  Step 0 / %zu"), typeNames[ti], m_state.steps.size());
+    UpdateStatusBar(status.GetString());
 }
 
 void CHXDlg::OnBnClickedStop()
@@ -255,6 +286,7 @@ void CHXDlg::OnBnClickedStop()
         KillTimer(TIMER_ID);
         m_state.isRunning = false;
         RedrawTree();
+        UpdateStatusBar(L"Stopped");
     }
 }
 
@@ -265,6 +297,7 @@ void CHXDlg::OnBnClickedClean()
     m_state.steps.clear();
     m_nodeSteps.clear();
     RedrawTree();
+    UpdateStatusBar(L"Ready");
 }
 
 void CHXDlg::OnSelchangeWay()
@@ -307,6 +340,12 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
                     RGB(255, 0, 0));
             }
 
+            CString status;
+            const wchar_t* typeNames[] = { L"Preorder", L"Inorder", L"Postorder" };
+            int ti = static_cast<int>(m_nCurrentType);
+            status.Format(_T("Traversing (%s)  |  Step %d / %zu"), typeNames[ti], m_state.currentIndex + 1, m_state.steps.size());
+            UpdateStatusBar(status.GetString());
+
             m_state.currentIndex++;
         }
         else
@@ -314,6 +353,9 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
             KillTimer(TIMER_ID);
             m_state.isRunning = false;
             RedrawTree();
+            CString status;
+            status.Format(_T("Traversal complete  |  %zu nodes visited"), m_state.steps.size());
+            UpdateStatusBar(status.GetString());
             AfxMessageBox(_T("\u904d\u5386\u5b8c\u6210\uff01"), MB_ICONINFORMATION);
         }
     }
@@ -462,4 +504,17 @@ void CHXDlg::OnDestroy()
 {
     OnBnClickedStop();
     CDialogEx::OnDestroy();
+}
+
+void CHXDlg::UpdateStatusBar(const std::wstring& text)
+{
+    if (m_wndStatusBar.GetSafeHwnd())
+        m_wndStatusBar.SetWindowText(text.c_str());
+}
+
+void CHXDlg::OnSize(UINT nType, int cx, int cy)
+{
+    CDialogEx::OnSize(nType, cx, cy);
+    if (m_wndStatusBar.GetSafeHwnd())
+        m_wndStatusBar.SetWindowPos(nullptr, 0, cy - 22, cx, 22, SWP_NOZORDER | SWP_NOACTIVATE);
 }

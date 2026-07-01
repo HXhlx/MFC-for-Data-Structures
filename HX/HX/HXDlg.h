@@ -47,7 +47,9 @@ public:
     afx_msg void OnSelchangeWay();
     afx_msg BOOL OnEraseBkgnd(CDC* pDC);
     afx_msg void OnDestroy();
+    afx_msg void OnSize(UINT nType, int cx, int cy);
     afx_msg void OnTimer(UINT_PTR nIDEvent);
+    void UpdateStatusBar(const std::wstring& text);
 
     void DrawTree(const BiTNode* node, int level, COLORREF color);
     void DrawTreeRecursive(const BiTNode* node, int level, COLORREF color);
@@ -59,6 +61,12 @@ public:
     CListCtrl m_wndResult;
     CListCtrl m_wndCode;
     CStatic m_wndPicture;
+    CMFCButton m_btnShow;
+    CMFCButton m_btnDisplay;
+    CMFCButton m_btnStart;
+    CMFCButton m_btnStop;
+    CMFCButton m_btnClean;
+    CStatic m_wndStatusBar;
 
     int m_nDeep;
     CString m_strInput;
