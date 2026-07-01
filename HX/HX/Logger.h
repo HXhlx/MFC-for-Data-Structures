@@ -6,8 +6,7 @@
 #include <string>
 #include <mutex>
 #include <chrono>
-#include <iomanip>
-#include <sstream>
+#include <format>
 
 class Logger
 {
@@ -49,13 +48,7 @@ private:
 
     std::string GetTimestamp()
     {
-        auto now = std::chrono::system_clock::now();
-        auto time = std::chrono::system_clock::to_time_t(now);
-        std::tm tm;
-        localtime_s(&tm, &time);
-        std::ostringstream oss;
-        oss << std::put_time(&tm, "%H:%M:%S");
-        return oss.str();
+        return std::format("{:%H:%M:%S}", std::chrono::system_clock::now());
     }
 
     std::ofstream m_file;

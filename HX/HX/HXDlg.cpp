@@ -222,9 +222,7 @@ void CHXDlg::OnBnClickedShow()
 
     RedrawTree();
     LOG("Tree created, depth=" + std::to_string(m_nDeep));
-    CString status;
-    status.Format(_T("Tree loaded  |  Nodes: %d  |  Depth: %d"), CountNodes(m_tree.get()), m_nDeep);
-    UpdateStatusBar(status.GetString());
+    UpdateStatusBar(std::format(L"Tree loaded  |  Nodes: {}  |  Depth: {}", CountNodes(m_tree.get()), m_nDeep));
 }
 
 void CHXDlg::OnBnClickedDisplay()
@@ -274,9 +272,7 @@ void CHXDlg::OnBnClickedStart()
 
     const wchar_t* typeNames[] = { L"Preorder", L"Inorder", L"Postorder" };
     int ti = static_cast<int>(m_nCurrentType);
-    CString status;
-    status.Format(_T("Traversing (%s)  |  Step 0 / %zu"), typeNames[ti], m_state.steps.size());
-    UpdateStatusBar(status.GetString());
+    UpdateStatusBar(std::format(L"Traversing ({})  |  Step 0 / {}", typeNames[ti], m_state.steps.size()));
 }
 
 void CHXDlg::OnBnClickedStop()
@@ -340,11 +336,9 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
                     RGB(255, 0, 0));
             }
 
-            CString status;
             const wchar_t* typeNames[] = { L"Preorder", L"Inorder", L"Postorder" };
             int ti = static_cast<int>(m_nCurrentType);
-            status.Format(_T("Traversing (%s)  |  Step %d / %zu"), typeNames[ti], m_state.currentIndex + 1, m_state.steps.size());
-            UpdateStatusBar(status.GetString());
+            UpdateStatusBar(std::format(L"Traversing ({})  |  Step {} / {}", typeNames[ti], m_state.currentIndex + 1, m_state.steps.size()));
 
             m_state.currentIndex++;
         }
@@ -353,9 +347,7 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
             KillTimer(TIMER_ID);
             m_state.isRunning = false;
             RedrawTree();
-            CString status;
-            status.Format(_T("Traversal complete  |  %zu nodes visited"), m_state.steps.size());
-            UpdateStatusBar(status.GetString());
+            UpdateStatusBar(std::format(L"Traversal complete  |  {} nodes visited", m_state.steps.size()));
             AfxMessageBox(_T("\u904d\u5386\u5b8c\u6210\uff01"), MB_ICONINFORMATION);
         }
     }

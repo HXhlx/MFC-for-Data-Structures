@@ -1,5 +1,6 @@
 #include "Tree.h"
 #include <algorithm>
+#include <format>
 
 BiTreePtr CreateBt(const std::wstring& input, size_t& index, int level, int address)
 {
@@ -21,9 +22,7 @@ int BiTreeDepth(const BiTNode* node)
 {
     if (!node)
         return 0;
-    int leftDepth = BiTreeDepth(node->lchild.get());
-    int rightDepth = BiTreeDepth(node->rchild.get());
-    return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
+    return 1 + std::max(BiTreeDepth(node->lchild.get()), BiTreeDepth(node->rchild.get()));
 }
 
 std::wstring GetTraversalCode(TraversalType type)
@@ -98,7 +97,7 @@ static void PreorderSteps(const BiTNode* node, std::vector<std::wstring>& steps)
         steps.push_back(L"NULL");
         return;
     }
-    steps.push_back(std::wstring(1, node->data));
+    steps.push_back(std::format(L"{}", node->data));
     PreorderSteps(node->lchild.get(), steps);
     PreorderSteps(node->rchild.get(), steps);
 }
@@ -111,7 +110,7 @@ static void InorderSteps(const BiTNode* node, std::vector<std::wstring>& steps)
         return;
     }
     InorderSteps(node->lchild.get(), steps);
-    steps.push_back(std::wstring(1, node->data));
+    steps.push_back(std::format(L"{}", node->data));
     InorderSteps(node->rchild.get(), steps);
 }
 
@@ -124,7 +123,7 @@ static void PostorderSteps(const BiTNode* node, std::vector<std::wstring>& steps
     }
     PostorderSteps(node->lchild.get(), steps);
     PostorderSteps(node->rchild.get(), steps);
-    steps.push_back(std::wstring(1, node->data));
+    steps.push_back(std::format(L"{}", node->data));
 }
 
 std::vector<std::wstring> GetTraversalSteps(const BiTNode* node, TraversalType type)
@@ -216,7 +215,7 @@ void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::v
         if (!current->lchild)
         {
             // No left child, visit and go right
-            steps.push_back(std::wstring(1, current->data));
+            steps.push_back(std::format(L"{}", current->data));
             nodes.push_back(current);
             current = current->rchild ? current->rchild.get() : current->thread;
         }
@@ -240,7 +239,7 @@ void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::v
             {
                 // Thread exists, remove it, visit current, move right
                 const_cast<BiTNode*>(predecessor)->thread = nullptr;
-                steps.push_back(std::wstring(1, current->data));
+                steps.push_back(std::format(L"{}", current->data));
                 nodes.push_back(current);
                 current = current->rchild ? current->rchild.get() : current->thread;
             }
@@ -256,7 +255,7 @@ void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::
         if (!current->lchild)
         {
             // No left child, visit and go right
-            steps.push_back(std::wstring(1, current->data));
+            steps.push_back(std::format(L"{}", current->data));
             nodes.push_back(current);
             current = current->rchild ? current->rchild.get() : current->thread;
         }
@@ -273,7 +272,7 @@ void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::
             if (predecessor->thread != current)
             {
                 // Visit current (preorder), create thread, move left
-                steps.push_back(std::wstring(1, current->data));
+                steps.push_back(std::format(L"{}", current->data));
                 nodes.push_back(current);
                 const_cast<BiTNode*>(predecessor)->thread = const_cast<BiTNode*>(current);
                 current = current->lchild.get();
@@ -290,14 +289,14 @@ void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::
 
 void MorrisPostorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
 {
-    // Morris Postorder: mirrored preorder (NRL), then reverse → LRN
+    // Morris Postorder: mirrored preorder (NRL), then reverse 鈫?LRN
     const BiTNode* current = root;
 
     while (current)
     {
         if (!current->rchild)
         {
-            steps.push_back(std::wstring(1, current->data));
+            steps.push_back(std::format(L"{}", current->data));
             nodes.push_back(current);
             current = current->lchild ? current->lchild.get() : current->thread;
         }
@@ -310,7 +309,7 @@ void MorrisPostorder(const BiTNode* root, std::vector<std::wstring>& steps, std:
 
             if (predecessor->thread != current)
             {
-                steps.push_back(std::wstring(1, current->data));
+                steps.push_back(std::format(L"{}", current->data));
                 nodes.push_back(current);
                 const_cast<BiTNode*>(predecessor)->thread = const_cast<BiTNode*>(current);
                 current = current->rchild.get();

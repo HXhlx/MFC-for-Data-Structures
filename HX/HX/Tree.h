@@ -24,23 +24,23 @@ struct BiTNode
     std::unique_ptr<BiTNode> rchild;
     BiTNode* thread; // For Morris traversal threading
 
-    BiTNode() : address(1), level(1), data(L'\0'), thread(nullptr) {}
-    BiTNode(DataType d, int lvl) : address(1), level(lvl), data(d), thread(nullptr) {}
+    BiTNode() noexcept : address(1), level(1), data(L'\0'), thread(nullptr) {}
+    BiTNode(DataType d, int lvl) noexcept : address(1), level(lvl), data(d), thread(nullptr) {}
 };
 
 using BiTreePtr = std::unique_ptr<BiTNode>;
 
-BiTreePtr CreateBt(const std::wstring& input, size_t& index, int level = 1, int address = 1);
-int BiTreeDepth(const BiTNode* node);
+[[nodiscard]] BiTreePtr CreateBt(const std::wstring& input, size_t& index, int level = 1, int address = 1);
+[[nodiscard]] int BiTreeDepth(const BiTNode* node);
 
-std::wstring GetTraversalCode(TraversalType type);
+[[nodiscard]] std::wstring GetTraversalCode(TraversalType type);
 
 // Recursive traversal (for step collection with NULL nodes)
-std::vector<std::wstring> GetTraversalSteps(const BiTNode* node, TraversalType type);
+[[nodiscard]] std::vector<std::wstring> GetTraversalSteps(const BiTNode* node, TraversalType type);
 void CollectTraversalNodes(const BiTNode* node, TraversalType type, std::vector<const BiTNode*>& nodes);
 
 // Morris Traversal - O(1) space, O(n) time
-std::vector<std::wstring> MorrisTraversal(const BiTNode* root, TraversalType type);
+[[nodiscard]] std::vector<std::wstring> MorrisTraversal(const BiTNode* root, TraversalType type);
 void MorrisTraversalWithNodes(const BiTNode* root, TraversalType type,
     std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes);
 
