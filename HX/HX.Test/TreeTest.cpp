@@ -135,21 +135,20 @@ TEST(BiTreeDepth, FullTree) {
 // Test Suite: GetTraversalCode
 TEST(GetTraversalCode, Preorder) {
     std::wstring code = GetTraversalCode(0);
-    EXPECT_TRUE(code.find(L"Preorder") != std::wstring::npos);
-    EXPECT_TRUE(code.find(L"visit(T)") != std::wstring::npos);
-    EXPECT_TRUE(code.find(L"lchild") != std::wstring::npos);
+    EXPECT_TRUE(code.find(L"Morris Preorder") != std::wstring::npos);
+    EXPECT_TRUE(code.find(L"visit(curr)") != std::wstring::npos);
 }
 
 TEST(GetTraversalCode, Inorder) {
     std::wstring code = GetTraversalCode(1);
-    EXPECT_TRUE(code.find(L"Inorder") != std::wstring::npos);
-    EXPECT_TRUE(code.find(L"visit(T)") != std::wstring::npos);
+    EXPECT_TRUE(code.find(L"Morris Inorder") != std::wstring::npos);
+    EXPECT_TRUE(code.find(L"visit(curr)") != std::wstring::npos);
 }
 
 TEST(GetTraversalCode, Postorder) {
     std::wstring code = GetTraversalCode(2);
-    EXPECT_TRUE(code.find(L"Postorder") != std::wstring::npos);
-    EXPECT_TRUE(code.find(L"visit(T)") != std::wstring::npos);
+    EXPECT_TRUE(code.find(L"Morris Postorder") != std::wstring::npos);
+    EXPECT_TRUE(code.find(L"reverse") != std::wstring::npos);
 }
 
 TEST(GetTraversalCode, InvalidType) {

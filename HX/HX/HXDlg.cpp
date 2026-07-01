@@ -225,24 +225,26 @@ void CHXDlg::OnBnClickedStart()
     }
 
     m_nCurrentType = m_wndWay.GetCurSel();
+    LOG("OnBnClickedStart: m_nCurrentType=" + std::to_string(m_nCurrentType));
     if (m_nCurrentType < 0 || m_nCurrentType > 2)
     {
         AfxMessageBox(_T("\u8bf7\u9009\u62e9\u904d\u5386\u65b9\u5f0f\uff01"), MB_ICONWARNING);
         return;
     }
 
+    // Update code display to match selected traversal
+    OnSelchangeWay();
+
     m_wndResult.DeleteAllItems();
     RedrawTree();
 
-    m_state.steps = GetTraversalSteps(m_tree.get(), m_nCurrentType);
+    // Use Morris traversal - O(1) space
+    MorrisTraversalWithNodes(m_tree.get(), m_nCurrentType, m_state.steps, m_nodeSteps);
     m_state.currentIndex = 0;
     m_state.isRunning = true;
 
-    m_nodeSteps.clear();
-    CollectTraversalNodes(m_tree.get(), m_nCurrentType, m_nodeSteps);
-
     SetTimer(TIMER_ID, 500, NULL);
-    LOG("Traversal animation started, type=" + std::to_string(m_nCurrentType));
+    LOG("Morris traversal animation started, type=" + std::to_string(m_nCurrentType));
 }
 
 void CHXDlg::OnBnClickedStop()
@@ -269,6 +271,8 @@ void CHXDlg::OnSelchangeWay()
     int sel = m_wndWay.GetCurSel();
     if (sel == CB_ERR)
         sel = 0;
+
+    LOG("OnSelchangeWay called, sel=" + std::to_string(sel));
 
     m_wndCode.DeleteAllItems();
 

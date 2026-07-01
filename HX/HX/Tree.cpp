@@ -30,36 +30,62 @@ std::wstring GetTraversalCode(int type)
 {
     switch (type)
     {
-    case 0: // Preorder
-        return L"void Preorder(BiTree T)\n"
-               L"{\n"
-               L"    if (T)\n"
-               L"    {\n"
-               L"        visit(T);           // visit root\n"
-               L"        Preorder(T->lchild); // left subtree\n"
-               L"        Preorder(T->rchild); // right subtree\n"
+    case 0: // Morris Preorder
+        return L"Morris Preorder - O(1) space\n"
+               L"while (curr) {\n"
+               L"  if (!curr->left) {\n"
+               L"    visit(curr);\n"
+               L"    curr = curr->right;\n"
+               L"  } else {\n"
+               L"    pred = findPred(curr);\n"
+               L"    if (!pred->right) {\n"
+               L"      visit(curr);\n"
+               L"      pred->right = curr;\n"
+               L"      curr = curr->left;\n"
+               L"    } else {\n"
+               L"      pred->right = null;\n"
+               L"      curr = curr->right;\n"
                L"    }\n"
+               L"  }\n"
                L"}";
-    case 1: // Inorder
-        return L"void Inorder(BiTree T)\n"
-               L"{\n"
-               L"    if (T)\n"
-               L"    {\n"
-               L"        Inorder(T->lchild);  // left subtree\n"
-               L"        visit(T);            // visit root\n"
-               L"        Inorder(T->rchild);  // right subtree\n"
+    case 1: // Morris Inorder
+        return L"Morris Inorder - O(1) space\n"
+               L"while (curr) {\n"
+               L"  if (!curr->left) {\n"
+               L"    visit(curr);\n"
+               L"    curr = curr->right;\n"
+               L"  } else {\n"
+               L"    pred = findPred(curr);\n"
+               L"    if (!pred->right) {\n"
+               L"      pred->right = curr;\n"
+               L"      curr = curr->left;\n"
+               L"    } else {\n"
+               L"      pred->right = null;\n"
+               L"      visit(curr);\n"
+               L"      curr = curr->right;\n"
                L"    }\n"
+               L"  }\n"
                L"}";
-    case 2: // Postorder
-        return L"void Postorder(BiTree T)\n"
-               L"{\n"
-               L"    if (T)\n"
-               L"    {\n"
-               L"        Postorder(T->lchild); // left subtree\n"
-               L"        Postorder(T->rchild); // right subtree\n"
-               L"        visit(T);             // visit root\n"
+    case 2: // Morris Postorder
+        return L"Morris Postorder - O(1) space\n"
+               L"// Mirrored preorder (NRL)\n"
+               L"while (curr) {\n"
+               L"  if (!curr->right) {\n"
+               L"    visit(curr);\n"
+               L"    curr = curr->left;\n"
+               L"  } else {\n"
+               L"    pred = findLeftmost(curr->right);\n"
+               L"    if (!pred->left) {\n"
+               L"      visit(curr);\n"
+               L"      pred->left = curr;\n"
+               L"      curr = curr->right;\n"
+               L"    } else {\n"
+               L"      pred->left = null;\n"
+               L"      curr = curr->left;\n"
                L"    }\n"
-               L"}";
+               L"  }\n"
+               L"}\n"
+               L"reverse(result); // NRL -> LRN";
     default:
         return L"";
     }
@@ -173,6 +199,15 @@ void CollectTraversalNodes(const BiTNode* node, int type, std::vector<const BiTN
 
 // ============== Morris Traversal - O(1) Space ==============
 
+// Helper: Clear all thread pointers in the tree
+static void ClearThreads(const BiTNode* node)
+{
+    if (!node) return;
+    const_cast<BiTNode*>(node)->thread = nullptr;
+    ClearThreads(node->lchild.get());
+    ClearThreads(node->rchild.get());
+}
+
 void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
 {
     const BiTNode* current = root;
@@ -189,12 +224,13 @@ void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::v
         {
             // Find inorder predecessor
             const BiTNode* predecessor = current->lchild.get();
-            while (predecessor->rchild && predecessor->rchild.get() != current && predecessor->thread != current)
+            while (predecessor->rchild && predecessor->rchild.get() != current
+                && predecessor->thread != current)
             {
                 predecessor = predecessor->rchild.get();
             }
 
-            if (!predecessor->rchild && predecessor->thread != current)
+            if (predecessor->thread != current)
             {
                 // Create thread, move left
                 const_cast<BiTNode*>(predecessor)->thread = const_cast<BiTNode*>(current);
@@ -202,11 +238,11 @@ void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::v
             }
             else
             {
-                // Thread exists, remove it, visit current
+                // Thread exists, remove it, visit current, move right
                 const_cast<BiTNode*>(predecessor)->thread = nullptr;
                 steps.push_back(std::wstring(1, current->data));
                 nodes.push_back(current);
-                current = current->rchild ? current->rchild.get() : nullptr;
+                current = current->rchild ? current->rchild.get() : current->thread;
             }
         }
     }
@@ -228,12 +264,13 @@ void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::
         {
             // Find inorder predecessor
             const BiTNode* predecessor = current->lchild.get();
-            while (predecessor->rchild && predecessor->rchild.get() != current && predecessor->thread != current)
+            while (predecessor->rchild && predecessor->rchild.get() != current
+                && predecessor->thread != current)
             {
                 predecessor = predecessor->rchild.get();
             }
 
-            if (!predecessor->rchild && predecessor->thread != current)
+            if (predecessor->thread != current)
             {
                 // Visit current (preorder), create thread, move left
                 steps.push_back(std::wstring(1, current->data));
@@ -243,9 +280,9 @@ void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::
             }
             else
             {
-                // Thread exists, remove it
+                // Thread exists, remove it, move right (don't visit again)
                 const_cast<BiTNode*>(predecessor)->thread = nullptr;
-                current = current->rchild ? current->rchild.get() : nullptr;
+                current = current->rchild ? current->rchild.get() : current->thread;
             }
         }
     }
@@ -310,4 +347,28 @@ std::vector<std::wstring> MorrisTraversal(const BiTNode* root, int type)
     }
 
     return steps;
+}
+
+void MorrisTraversalWithNodes(const BiTNode* root, int type,
+    std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes)
+{
+    // Clear previous results
+    steps.clear();
+    nodes.clear();
+
+    // Clear any leftover threads from previous traversals
+    ClearThreads(root);
+
+    switch (type)
+    {
+    case 0:
+        MorrisPreorder(root, steps, nodes);
+        break;
+    case 1:
+        MorrisInorder(root, steps, nodes);
+        break;
+    case 2:
+        MorrisPostorder(root, steps, nodes);
+        break;
+    }
 }

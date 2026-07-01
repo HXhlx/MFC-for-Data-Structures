@@ -34,8 +34,7 @@ void CollectTraversalNodes(const BiTNode* node, int type, std::vector<const BiTN
 
 // Morris Traversal - O(1) space, O(n) time
 std::vector<std::wstring> MorrisTraversal(const BiTNode* root, int type);
-void MorrisInorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes);
-void MorrisPreorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes);
-void MorrisPostorder(const BiTNode* root, std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes);
+void MorrisTraversalWithNodes(const BiTNode* root, int type,
+    std::vector<std::wstring>& steps, std::vector<const BiTNode*>& nodes);
 
 #endif // TREE_H
