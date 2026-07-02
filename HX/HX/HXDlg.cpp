@@ -43,6 +43,10 @@ CHXDlg::CHXDlg(CWnd* pParent)
 {
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     m_font.CreatePointFont(150, _T("Consolas"));
+    m_codeFont.CreatePointFont(100, _T("Consolas"));
+    m_labelFont.CreatePointFont(90, _T("Segoe UI Semibold"));
+    m_brushDialogBg.CreateSolidBrush(RGB(240, 242, 245));
+    m_brushCodeBg.CreateSolidBrush(RGB(250, 251, 252));
 }
 
 void CHXDlg::DoDataExchange(CDataExchange* pDX)
@@ -54,6 +58,10 @@ void CHXDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_DEEP, m_nDeep);
     DDX_Text(pDX, IDC_INPUT, m_strInput);
     DDX_Control(pDX, IDC_PICTURE, m_wndPicture);
+    DDX_Control(pDX, IDC_CARD_INPUT, m_cardInput);
+    DDX_Control(pDX, IDC_CARD_TRAVERSAL, m_cardTraversal);
+    DDX_Control(pDX, IDC_CARD_CANVAS, m_cardCanvas);
+    DDX_Control(pDX, IDC_CARD_RESULT, m_cardResult);
 }
 
 BEGIN_MESSAGE_MAP(CHXDlg, CDialogEx)
@@ -70,6 +78,7 @@ BEGIN_MESSAGE_MAP(CHXDlg, CDialogEx)
     ON_WM_DESTROY()
     ON_WM_TIMER()
     ON_WM_SIZE()
+    ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 BOOL CHXDlg::OnInitDialog()
@@ -98,13 +107,18 @@ BOOL CHXDlg::OnInitDialog()
 
     SetWindowText(_T("\u4e8c\u53c9\u6811\u904d\u5386\u53ef\u89c6\u5316"));
 
+    m_cardInput.SetTitle(_T("\u8f93\u5165"));
+    m_cardTraversal.SetTitle(_T("\u904d\u5386\u4ee3\u7801"));
+    m_cardCanvas.SetTitle(_T("\u753b\u5e03"));
+    m_cardResult.SetTitle(_T("\u904d\u5386\u7ed3\u679c"));
+
     CWnd* pWnd = nullptr;
     pWnd = GetDlgItem(IDC_SHOW);
     if (pWnd) pWnd->SetWindowText(_T("\u663e\u793a\u4e8c\u53c9\u6811"));
     pWnd = GetDlgItem(IDC_DISPLAY);
     if (pWnd) pWnd->SetWindowText(_T("\u6f14\u793a\u5b9e\u4f8b"));
     pWnd = GetDlgItem(IDC_START);
-    if (pWnd) pWnd->SetWindowText(_T("\u5f00\u59cb"));
+    if (pWnd) pWnd->SetWindowText(_T("\u5f00\u59cb\u904d\u5386"));
     pWnd = GetDlgItem(IDC_STOP);
     if (pWnd) pWnd->SetWindowText(_T("\u505c\u6b62"));
     pWnd = GetDlgItem(IDC_CLEAN);
@@ -115,31 +129,29 @@ BOOL CHXDlg::OnInitDialog()
     m_wndWay.InsertString(1, _T("\u4e2d\u5e8f\u904d\u5386\u4e8c\u53c9\u6811"));
     m_wndWay.InsertString(2, _T("\u540e\u5e8f\u904d\u5386\u4e8c\u53c9\u6811"));
     m_wndWay.SetCurSel(0);
+    m_wndWay.SetFont(&m_labelFont);
 
     CRect rect;
     m_wndResult.GetClientRect(rect);
     m_wndResult.InsertColumn(0, _T("\u904d\u5386\u7ed3\u679c"), LVCFMT_CENTER, rect.Width());
-    m_wndResult.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+    m_wndResult.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 
-    m_wndCode.GetClientRect(rect);
-    m_wndCode.InsertColumn(0, _T("\u4ee3\u7801"), LVCFMT_CENTER, rect.Width());
-    m_wndCode.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+    m_wndCode.SetFont(&m_codeFont);
 
     OnSelchangeWay();
 
-    // Subclass buttons as CMFCButton for modern styling
     m_btnShow.SubclassDlgItem(IDC_SHOW, this);
     m_btnDisplay.SubclassDlgItem(IDC_DISPLAY, this);
     m_btnStart.SubclassDlgItem(IDC_START, this);
     m_btnStop.SubclassDlgItem(IDC_STOP, this);
     m_btnClean.SubclassDlgItem(IDC_CLEAN, this);
 
-    // Create status bar at bottom
     CRect rc;
     GetClientRect(&rc);
     m_wndStatusBar.Create(_T("Ready"), WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP | SS_SUNKEN,
-        CRect(0, rc.bottom - 22, rc.right, rc.bottom), this);
+        CRect(0, rc.bottom - 24, rc.right, rc.bottom), this);
     m_wndStatusBar.SetFont(GetFont());
+    m_wndStatusBar.SetWindowText(_T("\u51c6\u5907\u5c31\u7eea"));
 
     return TRUE;
 }
@@ -222,7 +234,7 @@ void CHXDlg::OnBnClickedShow()
 
     RedrawTree();
     LOG("Tree created, depth=" + std::to_string(m_nDeep));
-    UpdateStatusBar(std::format(L"Tree loaded  |  Nodes: {}  |  Depth: {}", CountNodes(m_tree.get()), m_nDeep));
+    UpdateStatusBar(std::format(L"\u5df2\u52a0\u8f7d\u4e8c\u53c9\u6811  |  \u8282\u70b9\u6570: {}  |  \u6df1\u5ea6: {}", CountNodes(m_tree.get()), m_nDeep));
 }
 
 void CHXDlg::OnBnClickedDisplay()
@@ -270,9 +282,9 @@ void CHXDlg::OnBnClickedStart()
     SetTimer(TIMER_ID, 500, NULL);
     LOG("Morris traversal animation started, type=" + std::to_string(static_cast<int>(m_nCurrentType)));
 
-    const wchar_t* typeNames[] = { L"Preorder", L"Inorder", L"Postorder" };
+    const wchar_t* typeNames[] = { L"\u5148\u5e8f", L"\u4e2d\u5e8f", L"\u540e\u5e8f" };
     int ti = static_cast<int>(m_nCurrentType);
-    UpdateStatusBar(std::format(L"Traversing ({})  |  Step 0 / {}", typeNames[ti], m_state.steps.size()));
+    UpdateStatusBar(std::format(L"\u6b63\u5728\u904d\u5386 ({})  |  \u6b65\u9aa4 0 / {}", typeNames[ti], m_state.steps.size()));
 }
 
 void CHXDlg::OnBnClickedStop()
@@ -282,7 +294,7 @@ void CHXDlg::OnBnClickedStop()
         KillTimer(TIMER_ID);
         m_state.isRunning = false;
         RedrawTree();
-        UpdateStatusBar(L"Stopped");
+        UpdateStatusBar(L"\u5df2\u505c\u6b62");
     }
 }
 
@@ -291,9 +303,10 @@ void CHXDlg::OnBnClickedClean()
     OnBnClickedStop();
     m_wndResult.DeleteAllItems();
     m_state.steps.clear();
+    m_state.currentIndex = 0;
     m_nodeSteps.clear();
     RedrawTree();
-    UpdateStatusBar(L"Ready");
+    UpdateStatusBar(L"\u51c6\u5907\u5c31\u7eea");
 }
 
 void CHXDlg::OnSelchangeWay()
@@ -305,17 +318,16 @@ void CHXDlg::OnSelchangeWay()
     auto type = static_cast<TraversalType>(selIdx);
     LOG("OnSelchangeWay called, sel=" + std::to_string(selIdx));
 
-    m_wndCode.DeleteAllItems();
-
     std::wstring code = GetTraversalCode(type);
-    std::wistringstream iss(code);
-    std::wstring line;
-    int idx = 0;
-    while (std::getline(iss, line))
+    CString win32Text;
+    for (size_t i = 0; i < code.size(); i++)
     {
-        m_wndCode.InsertItem(idx, line.c_str());
-        idx++;
+        if (code[i] == L'\n' && (i == 0 || code[i - 1] != L'\r'))
+            win32Text += L"\r\n";
+        else
+            win32Text += code[i];
     }
+    m_wndCode.SetWindowText(win32Text);
 }
 
 void CHXDlg::OnTimer(UINT_PTR nIDEvent)
@@ -336,9 +348,9 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
                     RGB(255, 0, 0));
             }
 
-            const wchar_t* typeNames[] = { L"Preorder", L"Inorder", L"Postorder" };
+            const wchar_t* typeNames[] = { L"\u5148\u5e8f", L"\u4e2d\u5e8f", L"\u540e\u5e8f" };
             int ti = static_cast<int>(m_nCurrentType);
-            UpdateStatusBar(std::format(L"Traversing ({})  |  Step {} / {}", typeNames[ti], m_state.currentIndex + 1, m_state.steps.size()));
+            UpdateStatusBar(std::format(L"\u6b63\u5728\u904d\u5386 ({})  |  \u6b65\u9aa4 {} / {}", typeNames[ti], m_state.currentIndex + 1, m_state.steps.size()));
 
             m_state.currentIndex++;
         }
@@ -347,7 +359,7 @@ void CHXDlg::OnTimer(UINT_PTR nIDEvent)
             KillTimer(TIMER_ID);
             m_state.isRunning = false;
             RedrawTree();
-            UpdateStatusBar(std::format(L"Traversal complete  |  {} nodes visited", m_state.steps.size()));
+            UpdateStatusBar(std::format(L"\u904d\u5386\u5b8c\u6210  |  \u5171\u8bbf\u95ee {} \u4e2a\u8282\u70b9", m_state.steps.size()));
             AfxMessageBox(_T("\u904d\u5386\u5b8c\u6210\uff01"), MB_ICONINFORMATION);
         }
     }
@@ -368,22 +380,26 @@ void CHXDlg::DrawTree(const BiTNode* node, int level, COLORREF color)
     int x = rect.right * address / (int)(pow(2.0, level - 1) + 1);
     int y = rect.bottom * level / (m_nDeep + 1);
 
-    CPen pen;
-    pen.CreatePen(PS_SOLID, 3, color);
-    CPen* pOldPen = pDC->SelectObject(&pen);
-
     int radius = max(10 * m_nDeep / level, 8);
+
+    CPen pen(PS_SOLID, 2, RGB(70, 90, 120));
+    CBrush brush(color);
+    CPen* pOldPen = pDC->SelectObject(&pen);
+    CBrush* pOldBrush = pDC->SelectObject(&brush);
     pDC->Ellipse(x - radius, y - radius, x + radius, y + radius);
+    pDC->SelectObject(pOldBrush);
+    pDC->SelectObject(pOldPen);
 
     CFont* pOldFont = pDC->SelectObject(&m_font);
     pDC->SetBkMode(TRANSPARENT);
+    pDC->SetTextColor(RGB(255, 255, 255));
 
     CString str;
     str.Format(_T("%c"), node->data);
-    pDC->TextOut(x - 2 * m_nDeep / level, y - 2 * m_nDeep / level - 7, str);
+    pDC->SetTextAlign(TA_CENTER | TA_BASELINE);
+    pDC->TextOut(x, y + 5, str);
 
     pDC->SelectObject(pOldFont);
-    pDC->SelectObject(pOldPen);
     ReleaseDC(pDC);
 }
 
@@ -408,8 +424,7 @@ void CHXDlg::DrawLines(const BiTNode* node, int level)
     int x = rect.right * node->address / (int)(pow(2.0, level - 1) + 1);
     int y = rect.bottom * level / (m_nDeep + 1);
 
-    CPen pen;
-    pen.CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
+    CPen pen(PS_SOLID, 2, RGB(95, 99, 104));
     CPen* pOldPen = pDC->SelectObject(&pen);
 
     if (node->lchild)
@@ -440,14 +455,21 @@ void CHXDlg::RedrawTree()
     CDC* pDC = m_wndPicture.GetDC();
     CRect rect;
     m_wndPicture.GetClientRect(rect);
-    CBrush brush(RGB(170, 170, 170));
+    CBrush brush(RGB(250, 251, 252));
     pDC->FillRect(&rect, &brush);
+
+    CPen pen(PS_SOLID, 1, RGB(218, 220, 224));
+    CPen* pOldPen = pDC->SelectObject(&pen);
+    pDC->MoveTo(rect.left, rect.top);
+    pDC->LineTo(rect.right, rect.top);
+    pDC->SelectObject(pOldPen);
+
     ReleaseDC(pDC);
 
     if (m_tree)
     {
         DrawLines(m_tree.get(), 1);
-        DrawTreeRecursive(m_tree.get(), 1, RGB(0, 0, 0));
+        DrawTreeRecursive(m_tree.get(), 1, RGB(74, 144, 217));
     }
 }
 
@@ -464,22 +486,26 @@ void CHXDlg::DrawNodeHighlight(const BiTNode* node, int level, COLORREF color)
     int x = rect.right * address / (int)(pow(2.0, level - 1) + 1);
     int y = rect.bottom * level / (m_nDeep + 1);
 
-    CPen pen;
-    pen.CreatePen(PS_SOLID, 4, color);
-    CPen* pOldPen = pDC->SelectObject(&pen);
-
     int radius = max(12 * m_nDeep / level, 10);
+
+    CPen pen(PS_SOLID, 3, RGB(180, 40, 30));
+    CBrush brush(color);
+    CPen* pOldPen = pDC->SelectObject(&pen);
+    CBrush* pOldBrush = pDC->SelectObject(&brush);
     pDC->Ellipse(x - radius, y - radius, x + radius, y + radius);
+    pDC->SelectObject(pOldBrush);
+    pDC->SelectObject(pOldPen);
 
     CFont* pOldFont = pDC->SelectObject(&m_font);
     pDC->SetBkMode(TRANSPARENT);
+    pDC->SetTextColor(RGB(255, 255, 255));
 
     CString str;
     str.Format(_T("%c"), node->data);
-    pDC->TextOut(x - 2 * m_nDeep / level, y - 2 * m_nDeep / level - 7, str);
+    pDC->SetTextAlign(TA_CENTER | TA_BASELINE);
+    pDC->TextOut(x, y + 5, str);
 
     pDC->SelectObject(pOldFont);
-    pDC->SelectObject(pOldPen);
     ReleaseDC(pDC);
 }
 
@@ -487,8 +513,7 @@ BOOL CHXDlg::OnEraseBkgnd(CDC* pDC)
 {
     CRect rect;
     GetClientRect(rect);
-    CBrush brush(RGB(240, 240, 240));
-    pDC->FillRect(&rect, &brush);
+    pDC->FillRect(&rect, &m_brushDialogBg);
     return TRUE;
 }
 
@@ -508,5 +533,19 @@ void CHXDlg::OnSize(UINT nType, int cx, int cy)
 {
     CDialogEx::OnSize(nType, cx, cy);
     if (m_wndStatusBar.GetSafeHwnd())
-        m_wndStatusBar.SetWindowPos(nullptr, 0, cy - 22, cx, 22, SWP_NOZORDER | SWP_NOACTIVATE);
+        m_wndStatusBar.SetWindowPos(nullptr, 0, cy - 24, cx, 24, SWP_NOZORDER | SWP_NOACTIVATE);
+}
+
+HBRUSH CHXDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+    if (pWnd->GetDlgCtrlID() == IDC_CODE)
+    {
+        pDC->SetBkColor(RGB(250, 251, 252));
+        pDC->SetTextColor(RGB(60, 64, 67));
+        return (HBRUSH)m_brushCodeBg;
+    }
+
+    return hbr;
 }

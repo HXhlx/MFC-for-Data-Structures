@@ -42,6 +42,12 @@
     <ClInclude Include="Tree.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CardPanel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HX.cpp">
@@ -54,6 +60,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Tree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CardPanel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

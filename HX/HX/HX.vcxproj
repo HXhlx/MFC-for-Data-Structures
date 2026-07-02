@@ -202,14 +202,19 @@
     <None Include="res\HX.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CardPanel.h" />
     <ClInclude Include="HX.h" />
     <ClInclude Include="HXDlg.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CardPanel.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="HX.cpp" />
     <ClCompile Include="HXDlg.cpp" />
     <ClCompile Include="stdafx.cpp">

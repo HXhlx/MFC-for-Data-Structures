@@ -19,6 +19,11 @@
 #define IDC_STEP                        1010
 #define IDC_CLEAN                       1011
 #define IDC_PICTURE                     1012
+#define IDC_CARD_INPUT                  1013
+#define IDC_CARD_TRAVERSAL              1014
+#define IDC_CARD_CANVAS                 1015
+#define IDC_CARD_RESULT                 1016
+#define IDC_CODE_EDIT                   1017
 
 // Next default values for new objects
 // 
@@ -26,7 +31,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1013
+#define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
