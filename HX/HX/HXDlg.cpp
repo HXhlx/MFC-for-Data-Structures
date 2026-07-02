@@ -55,7 +55,6 @@ void CHXDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_WAY, m_wndWay);
     DDX_Control(pDX, IDC_RESULT, m_wndResult);
     DDX_Control(pDX, IDC_CODE, m_wndCode);
-    DDX_Text(pDX, IDC_DEEP, m_nDeep);
     DDX_Text(pDX, IDC_INPUT, m_strInput);
     DDX_Control(pDX, IDC_PICTURE, m_wndPicture);
     DDX_Control(pDX, IDC_CARD_INPUT, m_cardInput);
@@ -230,7 +229,7 @@ void CHXDlg::OnBnClickedShow()
     size_t index = 0;
     m_tree = CreateBt(inputStr, index);
     m_nDeep = BiTreeDepth(m_tree.get());
-    UpdateData(FALSE);
+    SetDlgItemText(IDC_DEEP, std::to_wstring(m_nDeep).c_str());
 
     RedrawTree();
     LOG("Tree created, depth=" + std::to_string(m_nDeep));
@@ -239,8 +238,7 @@ void CHXDlg::OnBnClickedShow()
 
 void CHXDlg::OnBnClickedDisplay()
 {
-    m_strInput = _T("abc#d####");
-    UpdateData(FALSE);
+    GetDlgItem(IDC_INPUT)->SetWindowText(_T("abc#d####"));
     OnBnClickedShow();
 }
 
@@ -526,7 +524,11 @@ void CHXDlg::OnDestroy()
 void CHXDlg::UpdateStatusBar(const std::wstring& text)
 {
     if (m_wndStatusBar.GetSafeHwnd())
+    {
+        m_wndStatusBar.Invalidate();
         m_wndStatusBar.SetWindowText(text.c_str());
+        m_wndStatusBar.UpdateWindow();
+    }
 }
 
 void CHXDlg::OnSize(UINT nType, int cx, int cy)
@@ -540,11 +542,26 @@ HBRUSH CHXDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
     HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 
+    if (pWnd->GetSafeHwnd() == m_wndStatusBar.GetSafeHwnd())
+    {
+        pDC->SetBkColor(RGB(240, 242, 245));
+        pDC->SetTextColor(RGB(60, 64, 67));
+        pDC->SetBkMode(OPAQUE);
+        return (HBRUSH)m_brushDialogBg;
+    }
+
     if (pWnd->GetDlgCtrlID() == IDC_CODE)
     {
         pDC->SetBkColor(RGB(250, 251, 252));
         pDC->SetTextColor(RGB(60, 64, 67));
         return (HBRUSH)m_brushCodeBg;
+    }
+
+    if (nCtlColor == CTLCOLOR_STATIC)
+    {
+        pDC->SetBkMode(TRANSPARENT);
+        pDC->SetTextColor(RGB(60, 64, 67));
+        return (HBRUSH)GetStockObject(NULL_BRUSH);
     }
 
     return hbr;

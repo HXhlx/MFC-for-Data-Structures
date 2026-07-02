@@ -42,24 +42,51 @@ void CCardPanel::SetColors(COLORREF crBackground, COLORREF crBorder)
 
 BOOL CCardPanel::OnEraseBkgnd(CDC* pDC)
 {
+    CRect rect;
+    GetClientRect(rect);
+
+    CRect cardScreen;
+    GetWindowRect(&cardScreen);
+
+    HWND hParent = GetParent()->GetSafeHwnd();
+    HWND hChild = ::GetWindow(hParent, GW_CHILD);
+    while (hChild)
+    {
+        if (hChild != GetSafeHwnd() && ::IsWindowVisible(hChild))
+        {
+            CRect childScreen;
+            ::GetWindowRect(hChild, &childScreen);
+            CRect childInCard;
+            childInCard.left = childScreen.left - cardScreen.left;
+            childInCard.top = childScreen.top - cardScreen.top;
+            childInCard.right = childScreen.right - cardScreen.left;
+            childInCard.bottom = childScreen.bottom - cardScreen.top;
+
+            if (childInCard.left < rect.right && childInCard.right > 0 &&
+                childInCard.top < rect.bottom && childInCard.bottom > 0)
+            {
+                pDC->ExcludeClipRect(&childInCard);
+            }
+        }
+        hChild = ::GetWindow(hChild, GW_HWNDNEXT);
+    }
+
+    CBrush brushBg(m_crBackground);
+    CPen penBorder(PS_SOLID, 1, m_crBorder);
+    CPen* pOldPen = pDC->SelectObject(&penBorder);
+    CBrush* pOldBrush = pDC->SelectObject(&brushBg);
+
+    pDC->RoundRect(rect, CPoint(m_nCornerRadius, m_nCornerRadius));
+
+    pDC->SelectObject(pOldBrush);
+    pDC->SelectObject(pOldPen);
+
     return TRUE;
 }
 
 void CCardPanel::OnPaint()
 {
     CPaintDC dc(this);
-    CRect rect;
-    GetClientRect(rect);
-
-    CBrush brushBg(m_crBackground);
-    CPen penBorder(PS_SOLID, 1, m_crBorder);
-    CPen* pOldPen = dc.SelectObject(&penBorder);
-    CBrush* pOldBrush = dc.SelectObject(&brushBg);
-
-    dc.RoundRect(rect, CPoint(m_nCornerRadius, m_nCornerRadius));
-
-    dc.SelectObject(pOldBrush);
-    dc.SelectObject(pOldPen);
 
     if (!m_strTitle.IsEmpty())
     {
@@ -69,6 +96,8 @@ void CCardPanel::OnPaint()
         dc.SetTextColor(m_crTitle);
         dc.SetBkMode(TRANSPARENT);
 
+        CRect rect;
+        GetClientRect(rect);
         CRect titleRect(rect.left + 14, rect.top + 6, rect.right - 14, rect.top + 26);
         dc.DrawText(m_strTitle, titleRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 
